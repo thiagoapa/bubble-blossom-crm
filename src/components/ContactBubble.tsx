@@ -31,7 +31,7 @@ export function ContactBubble({
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <motion.button
+        <motion.div
           key={id}
           initial={isNew ? { scale: 0, rotate: -8, opacity: 0 } : { scale: 1 }}
           animate={{ scale: 1, rotate: 0, opacity: 1 }}
@@ -42,9 +42,11 @@ export function ContactBubble({
           }
           whileHover={{ scale: 1.12, y: -3 }}
           whileTap={{ scale: 0.93 }}
-          draggable
-          onDragStart={onDragStart}
-          onClick={onClick}
+        >
+          <button
+            draggable
+            onDragStart={onDragStart}
+            onClick={onClick}
           className={`
             relative w-12 h-12 rounded-full flex items-center justify-center
             ${config.colorClass} ${config.textClass}
