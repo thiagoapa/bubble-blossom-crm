@@ -31,10 +31,14 @@ export function ContactBubble({
     <AnimatePresence>
       <motion.div
         key={id}
-        initial={isNew ? { scale: 0, opacity: 0 } : false}
-        animate={{ scale: 1, opacity: 1 }}
+        initial={isNew ? { scale: 0, opacity: 0, rotate: -10 } : false}
+        animate={{ scale: 1, opacity: 1, rotate: 0 }}
         exit={{ scale: 0, opacity: 0 }}
-        transition={isNew ? { type: "spring", stiffness: 380, damping: 14 } : undefined}
+        transition={
+          isNew
+            ? { type: "spring", stiffness: 400, damping: 14 }
+            : undefined
+        }
         className="flex-shrink-0"
       >
         <Tooltip>
@@ -44,19 +48,26 @@ export function ContactBubble({
               draggable
               onDragStart={onDragStart}
               className={`
-                w-12 h-12 rounded-full flex items-center justify-center
+                w-11 h-11 rounded-full flex items-center justify-center
                 ${config.colorClass} ${config.textClass}
-                text-xs font-bold cursor-grab active:cursor-grabbing
-                select-none outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary
-                shadow-bubble hover:shadow-bubble-hover hover:scale-110 hover:-translate-y-1
+                text-[11px] font-black cursor-grab active:cursor-grabbing
+                select-none outline-none
+                focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary
                 transition-all duration-150
+                hover:scale-115 hover:-translate-y-1.5
               `}
+              style={{
+                boxShadow: `0 4px 14px ${config.headerColor}55, 0 1px 4px ${config.headerColor}33, inset 0 1px 0 rgba(255,255,255,0.25)`,
+              }}
               aria-label={nombre}
             >
               {initials || "?"}
             </button>
           </TooltipTrigger>
-          <TooltipContent side="top" className="text-xs font-medium px-2 py-1 rounded-lg">
+          <TooltipContent
+            side="top"
+            className="text-xs font-semibold px-2.5 py-1 rounded-lg shadow-md"
+          >
             {nombre}
           </TooltipContent>
         </Tooltip>
