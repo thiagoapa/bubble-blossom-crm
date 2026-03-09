@@ -32,35 +32,28 @@ export function ContactBubble({
       <TooltipTrigger asChild>
         <motion.button
           layout
-          initial={isNew ? { scale: 0, rotate: -8, opacity: 0 } : false}
-          animate={{ scale: 1, rotate: 0, opacity: 1 }}
-          transition={
-            isNew
-              ? { type: "spring", stiffness: 400, damping: 15 }
-              : undefined
-          }
-          whileHover={{ scale: 1.12, y: -3 }}
-          whileTap={{ scale: 0.93 }}
-          draggable
-          onDragStart={onDragStart as React.DragEventHandler<HTMLButtonElement>}
+          key={id}
+          initial={isNew ? { scale: 0, opacity: 0 } : false}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={isNew ? { type: "spring", stiffness: 380, damping: 14 } : undefined}
           onClick={onClick}
+          draggable
+          onDragStart={onDragStart as unknown as React.DragEventHandler<HTMLButtonElement>}
           className={`
             w-12 h-12 rounded-full flex items-center justify-center
             ${config.colorClass} ${config.textClass}
-            text-xs font-bold shadow-bubble cursor-grab active:cursor-grabbing
+            text-xs font-bold cursor-grab active:cursor-grabbing
             select-none outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary
-            transition-shadow hover:shadow-bubble-hover
+            shadow-bubble hover:shadow-bubble-hover hover:scale-110 hover:-translate-y-1
+            transition-all duration-150
           `}
           aria-label={nombre}
-          key={id}
+          style={{ touchAction: "none" }}
         >
           {initials || "?"}
         </motion.button>
       </TooltipTrigger>
-      <TooltipContent
-        side="top"
-        className="text-xs font-medium px-2 py-1 rounded-lg"
-      >
+      <TooltipContent side="top" className="text-xs font-medium px-2 py-1 rounded-lg">
         {nombre}
       </TooltipContent>
     </Tooltip>
