@@ -3,78 +3,80 @@
 @tailwind utilities;
 
 /* ============================================
-   BUBBLE CRM — Design System
-   Rose TDAH-friendly aesthetic
-   All colors in HSL
+   BUBBLE CRM — Rosa Premium SaaS
+   Rich rose/magenta gradients, glass depth
    ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
 
 @layer base {
   :root {
-    /* Core palette */
-    --background: 350 100% 99%;
-    --foreground: 0 0% 29%;
+    /* Core */
+    --background: 340 30% 97%;
+    --foreground: 330 15% 18%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 29%;
+    --card-foreground: 330 15% 18%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 29%;
+    --popover-foreground: 330 15% 18%;
 
-    /* Primary: deep rose */
-    --primary: 337 70% 65%;
+    /* Primary: deep rose-magenta */
+    --primary: 336 72% 58%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 337 85% 75%;
-    --primary-deep: 337 60% 55%;
+    --primary-glow: 350 90% 72%;
+    --primary-deep: 330 65% 44%;
+    --primary-soft: 340 80% 92%;
 
-    /* Secondary: soft pink */
-    --secondary: 350 80% 95%;
-    --secondary-foreground: 0 0% 29%;
+    /* Secondary */
+    --secondary: 345 70% 94%;
+    --secondary-foreground: 330 30% 30%;
 
-    --muted: 350 50% 96%;
-    --muted-foreground: 0 0% 55%;
+    --muted: 340 40% 95%;
+    --muted-foreground: 330 12% 52%;
 
-    --accent: 350 80% 90%;
-    --accent-foreground: 337 60% 45%;
+    --accent: 345 65% 91%;
+    --accent-foreground: 336 72% 44%;
 
     --destructive: 0 72% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 340 40% 90%;
-    --input: 340 40% 90%;
-    --ring: 337 70% 65%;
+    --border: 340 30% 88%;
+    --input: 340 30% 88%;
+    --ring: 336 72% 58%;
 
-    --radius: 1.25rem;
+    --radius: 1rem;
 
-    /* Column colors */
-    --col-novos: 290 25% 51%;
-    --col-primeira: 34 100% 65%;
-    --col-segunda: 22 100% 63%;
-    --col-followup: 208 44% 59%;
-    --col-comprador: 122 24% 59%;
+    /* Phase column accent colors */
+    --col-novos:     285 35% 52%;
+    --col-primeira:  34 95% 60%;
+    --col-segunda:   22 95% 58%;
+    --col-followup:  208 50% 56%;
+    --col-comprador: 145 40% 48%;
 
-    /* Bubble colors (slightly lighter) */
-    --bubble-novos: 290 25% 51%;
-    --bubble-primeira: 34 100% 65%;
-    --bubble-segunda: 22 100% 63%;
-    --bubble-followup: 208 44% 59%;
-    --bubble-comprador: 122 24% 59%;
+    /* Bubble colors */
+    --bubble-novos:     285 35% 52%;
+    --bubble-primeira:  34 95% 60%;
+    --bubble-segunda:   22 95% 58%;
+    --bubble-followup:  208 50% 56%;
+    --bubble-comprador: 145 40% 48%;
 
     /* Column background tints */
-    --colbg-novos: 290 40% 96%;
-    --colbg-primeira: 34 100% 96%;
-    --colbg-segunda: 22 100% 96%;
-    --colbg-followup: 208 60% 95%;
-    --colbg-comprador: 122 40% 95%;
+    --colbg-novos:     285 40% 97%;
+    --colbg-primeira:  34 100% 97%;
+    --colbg-segunda:   22 100% 97%;
+    --colbg-followup:  208 60% 96%;
+    --colbg-comprador: 145 50% 96%;
 
-    /* Progress colors */
-    --progress-bg: 340 60% 92%;
-    --progress-fill: 337 70% 65%;
+    /* Progress */
+    --progress-bg:   336 50% 92%;
+    --progress-fill: 336 72% 58%;
 
-    /* Glassmorphism */
-    --glass-bg: 0 0% 100% / 0.7;
-    --glass-border: 337 60% 88%;
+    /* Glass surface */
+    --glass-bg: 0 0% 100% / 0.65;
+    --glass-border: 336 55% 85%;
 
-    /* Sidebar kept for shadcn compatibility */
+    /* Sidebar (shadcn compat) */
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -94,69 +96,113 @@
     @apply bg-background text-foreground;
     font-family: 'Poppins', sans-serif;
     min-height: 100vh;
+    /* Rich layered gradient — Rosa Premium SaaS */
+    background-color: hsl(340 30% 97%);
     background-image:
-      radial-gradient(circle at 20% 20%, hsl(337 85% 90% / 0.4) 0%, transparent 50%),
-      radial-gradient(circle at 80% 80%, hsl(290 40% 92% / 0.3) 0%, transparent 50%);
+      radial-gradient(ellipse 80% 50% at 10% -10%,  hsl(336 90% 88% / 0.55) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 90% 5%,   hsl(285 60% 88% / 0.35) 0%, transparent 55%),
+      radial-gradient(ellipse 70% 50% at 50% 100%,  hsl(350 80% 92% / 0.45) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 0%   80%,  hsl(208 60% 90% / 0.25) 0%, transparent 50%);
+    background-attachment: fixed;
   }
 }
 
 /* ============================================
-   Custom bubble animations
+   Animations
    ============================================ */
 @keyframes bubble-pop {
-  0%   { transform: scale(0) rotate(-5deg); opacity: 0; }
-  60%  { transform: scale(1.15) rotate(2deg); opacity: 1; }
-  80%  { transform: scale(0.95) rotate(-1deg); }
-  100% { transform: scale(1) rotate(0deg); opacity: 1; }
-}
-
-@keyframes progress-fill {
-  from { width: 0%; }
-  to   { width: var(--progress-w); }
+  0%   { transform: scale(0) rotate(-8deg); opacity: 0; }
+  55%  { transform: scale(1.2) rotate(3deg);  opacity: 1; }
+  75%  { transform: scale(0.93) rotate(-1deg); }
+  100% { transform: scale(1)  rotate(0deg);  opacity: 1; }
 }
 
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-4px); }
+  50%       { transform: translateY(-5px); }
 }
 
 @keyframes shimmer {
   0%   { background-position: -200% center; }
-  100% { background-position: 200% center; }
+  100% { background-position:  200% center; }
 }
 
 @keyframes pulse-ring {
-  0%   { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4); }
+  0%   { box-shadow: 0 0 0 0   hsl(var(--primary) / 0.5); }
   70%  { box-shadow: 0 0 0 10px hsl(var(--primary) / 0); }
-  100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
+  100% { box-shadow: 0 0 0 0   hsl(var(--primary) / 0); }
 }
 
+@keyframes gradient-shift {
+  0%   { background-position: 0%   50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0%   50%; }
+}
+
+@keyframes accordion-down {
+  from { height: 0 }
+  to   { height: var(--radix-accordion-content-height) }
+}
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height) }
+  to   { height: 0 }
+}
+
+/* ============================================
+   Utility layer
+   ============================================ */
 @layer utilities {
-  .animate-bubble-pop  { animation: bubble-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+  .animate-bubble-pop  { animation: bubble-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
   .animate-float       { animation: float 3s ease-in-out infinite; }
   .animate-pulse-ring  { animation: pulse-ring 2s ease-out infinite; }
+  .animate-accordion-down { animation: accordion-down 0.2s ease-out; }
+  .animate-accordion-up   { animation: accordion-up   0.2s ease-out; }
 
+  /* Premium glass surface */
   .glass {
-    background: hsl(0 0% 100% / 0.75);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid hsl(var(--glass-border));
+    background: hsl(0 0% 100% / 0.72);
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    border: 1px solid hsl(var(--glass-border) / 0.6);
   }
 
+  /* Column cards */
   .column-card {
-    background: hsl(0 0% 100% / 0.65);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1.5px solid hsl(var(--border));
+    background: hsl(0 0% 100% / 0.60);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1.5px solid hsl(var(--border) / 0.7);
     border-radius: var(--radius);
   }
 
+  /* Animated gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, hsl(var(--primary-deep)), hsl(var(--primary)), hsl(var(--primary-glow)));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradient-shift 4s ease infinite;
+  }
+
+  /* Glossy pill/badge */
+  .pill-gradient {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    box-shadow: 0 4px 14px hsl(var(--primary) / 0.4), inset 0 1px 0 hsl(0 0% 100% / 0.25);
+  }
+
   .drop-target-active {
-    @apply ring-2 ring-primary ring-offset-2 scale-[1.01];
+    @apply ring-2 ring-primary ring-offset-2 scale-[1.02];
     transition: all 0.15s ease;
   }
 
-  .scrollbar-thin::-webkit-scrollbar { width: 4px; }
-  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
-  .scrollbar-thin::-webkit-scrollbar-thumb { background: hsl(var(--primary) / 0.3); border-radius: 99px; }
+  .scrollbar-thin::-webkit-scrollbar        { width: 4px; }
+  .scrollbar-thin::-webkit-scrollbar-track  { background: transparent; }
+  .scrollbar-thin::-webkit-scrollbar-thumb  {
+    background: hsl(var(--primary) / 0.25);
+    border-radius: 99px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.45);
+  }
 }
