@@ -8,8 +8,7 @@ interface ContactBubbleProps {
   nombre: string;
   fase: Phase;
   onClick: () => void;
-  draggable?: boolean;
-  onDragStart?: (e: React.DragEvent) => void;
+  onDragStart?: (e: React.DragEvent<HTMLButtonElement>) => void;
   isNew?: boolean;
 }
 
@@ -31,30 +30,29 @@ export function ContactBubble({
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <motion.div
-          key={id}
-          initial={isNew ? { scale: 0, rotate: -8, opacity: 0 } : { scale: 1 }}
+        <motion.button
+          layout
+          initial={isNew ? { scale: 0, rotate: -8, opacity: 0 } : false}
           animate={{ scale: 1, rotate: 0, opacity: 1 }}
           transition={
             isNew
               ? { type: "spring", stiffness: 400, damping: 15 }
-              : { duration: 0 }
+              : undefined
           }
           whileHover={{ scale: 1.12, y: -3 }}
           whileTap={{ scale: 0.93 }}
-        >
-          <button
-            draggable
-            onDragStart={onDragStart}
-            onClick={onClick}
+          draggable
+          onDragStart={onDragStart as React.DragEventHandler<HTMLButtonElement>}
+          onClick={onClick}
           className={`
-            relative w-12 h-12 rounded-full flex items-center justify-center
+            w-12 h-12 rounded-full flex items-center justify-center
             ${config.colorClass} ${config.textClass}
             text-xs font-bold shadow-bubble cursor-grab active:cursor-grabbing
             select-none outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary
             transition-shadow hover:shadow-bubble-hover
           `}
           aria-label={nombre}
+          key={id}
         >
           {initials || "?"}
         </motion.button>
