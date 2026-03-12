@@ -7,7 +7,10 @@ export interface Contact {
   nombre: string;
   telefono?: string;
   fase: Phase;
-  fechaCreacion: string; // ISO date string
+  fechaCreacion: string; // ISO date string (backwards-compat createdAt)
+  createdAt?: string; // normalized created date (ISO)
+  firstMeetingDate?: string; // 1R (ISO)
+  secondMeetingDate?: string; // 2R (ISO)
   trelloUrl?: string;
 }
 
@@ -66,10 +69,16 @@ export function useContacts() {
     saveStore(store);
   }, [store]);
 
-  // Weekly contacts: contacts created this week
+  // Normalize legacy contacts that only had `fechaCreacion`
+  const contactosNormalizados = store.contactos.map((c) => ({
+    ...c,
+    createdAt: c.createdAt ?? c.fechaCreacion,
+  }));
+
+  // Weekly contacts: contacts created this week (based on createdAt)
   const currentWeekStart = getWeekStart();
-  const weeklyContacts = store.contactos.filter(
-    (c) => c.fechaCreacion >= currentWeekStart
+  const weeklyContacts = contactosNormalizados.filter(
+    (c) => (c.createdAt ?? c.fechaCreacion) >= currentWeekStart
   );
   const weeklyCount = weeklyContacts.length;
   const metaSemanal = store.metaSemanal;
@@ -77,12 +86,14 @@ export function useContacts() {
 
   // Today's count
   const today = new Date().toISOString().split("T")[0];
-  const todayCount = store.contactos.filter((c) => c.fechaCreacion === today).length;
+  const todayCount = contactosNormalizados.filter(
+    (c) => (c.createdAt ?? c.fechaCreacion) === today
+  ).length;
 
   // This month's count
   const monthPrefix = today.slice(0, 7);
-  const monthCount = store.contactos.filter((c) =>
-    c.fechaCreacion.startsWith(monthPrefix)
+  const monthCount = contactosNormalizados.filter((c) =>
+    (c.createdAt ?? c.fechaCreacion).startsWith(monthPrefix)
   ).length;
 
   // Heatmap: last 30 days
@@ -90,17 +101,21 @@ export function useContacts() {
     const d = new Date();
     d.setDate(d.getDate() - (29 - i));
     const dateStr = d.toISOString().split("T")[0];
-    const count = store.contactos.filter((c) => c.fechaCreacion === dateStr).length;
+    const count = contactosNormalizados.filter(
+      (c) => (c.createdAt ?? c.fechaCreacion) === dateStr
+    ).length;
     return { date: dateStr, count };
   });
 
-  const addContact = useCallback((nombre: string, telefono?: string) => {
+  const addContact = useCallback((nombre: string, telefono?: string, createdDate?: string) => {
+    const baseDate = createdDate || new Date().toISOString().split("T")[0];
     const newContact: Contact = {
       id: crypto.randomUUID(),
       nombre: nombre.trim(),
       telefono: telefono?.trim() || undefined,
       fase: "novos",
-      fechaCreacion: new Date().toISOString().split("T")[0],
+      fechaCreacion: baseDate,
+      createdAt: baseDate,
       trelloUrl: undefined,
     };
     setStore((prev) => ({
@@ -110,14 +125,30 @@ export function useContacts() {
     return newContact;
   }, []);
 
-  const changePhase = useCallback((id: string, newFase: Phase) => {
-    setStore((prev) => ({
-      ...prev,
-      contactos: prev.contactos.map((c) =>
-        c.id === id ? { ...c, fase: newFase } : c
-      ),
-    }));
-  }, []);
+  const changePhase = useCallback(
+    (id: string, newFase: Phase, phaseDate?: string) => {
+      const todayStr = new Date().toISOString().split("T")[0];
+      setStore((prev) => ({
+        ...prev,
+        contactos: prev.contactos.map((c) => {
+          if (c.id !== id) return c;
+
+          const next: Contact = { ...c, fase: newFase };
+
+          const effectiveDate = phaseDate || todayStr;
+          if (newFase === "primeira" && !next.firstMeetingDate) {
+            next.firstMeetingDate = effectiveDate;
+          }
+          if (newFase === "segunda" && !next.secondMeetingDate) {
+            next.secondMeetingDate = effectiveDate;
+          }
+
+          return next;
+        }),
+      }));
+    },
+    []
+  );
 
   const deleteContact = useCallback((id: string) => {
     setStore((prev) => ({
@@ -173,7 +204,7 @@ export function useContacts() {
     store.contactos.filter((c) => c.fase === fase);
 
   return {
-    contacts: store.contactos,
+    contacts: contactosNormalizados,
     groups: store.agrupacionesManuales,
     metaSemanal,
     weeklyCount,

@@ -3,12 +3,14 @@ import { motion } from "framer-motion";
 import { Plus, Loader2, Sparkles } from "lucide-react";
 
 interface ContactInputProps {
-  onAdd: (nombre: string, telefono?: string) => void;
+  onAdd: (nombre: string, telefono?: string, createdAt?: string) => void;
 }
 
 export function ContactInput({ onAdd }: ContactInputProps) {
   const [value, setValue] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showDateChoice, setShowDateChoice] = useState(false);
+  const [createdAt, setCreatedAt] = useState<string | undefined>(undefined);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,10 +27,18 @@ export function ContactInput({ onAdd }: ContactInputProps) {
     }
     if (!nombre) nombre = telefono ?? "Sin nombre";
 
+    // If user hasn't chosen date yet, open quick choice and bail
+    if (!showDateChoice && !createdAt) {
+      setShowDateChoice(true);
+      return;
+    }
+
     setLoading(true);
     setTimeout(() => {
-      onAdd(nombre, telefono);
+      onAdd(nombre, telefono, createdAt);
       setValue("");
+      setCreatedAt(undefined);
+      setShowDateChoice(false);
       setLoading(false);
     }, 380);
   };
@@ -57,7 +67,7 @@ export function ContactInput({ onAdd }: ContactInputProps) {
       </div>
 
       {/* Input */}
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 space-y-1.5">
         <input
           type="text"
           value={value}
@@ -66,9 +76,51 @@ export function ContactInput({ onAdd }: ContactInputProps) {
           className="bg-transparent text-foreground placeholder:text-muted-foreground/60 text-sm font-medium outline-none w-full"
           disabled={loading}
         />
-        <p className="text-[10px] text-muted-foreground/70 mt-0.5 font-medium">
-          → Crea burbuja morada en <span className="text-primary font-semibold">Novos Contatos</span>
+        <p className="text-[10px] text-muted-foreground/70 font-medium">
+          → Crea burbuja en <span className="font-semibold text-foreground">Novos Contatos</span>
         </p>
+
+        {showDateChoice && (
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <span className="text-[10px] font-medium text-muted-foreground">
+              ¿Este contacto se creó hoy?
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  const today = new Date().toISOString().split("T")[0];
+                  setCreatedAt(today);
+                }}
+                className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold ${
+                  !createdAt
+                    ? "border-neutral-900 bg-neutral-900 text-white"
+                    : "border-border bg-background text-foreground hover:border-neutral-900/60"
+                }`}
+              >
+                Hoy
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!createdAt) {
+                    const today = new Date().toISOString().split("T")[0];
+                    setCreatedAt(today);
+                  }
+                }}
+                className="rounded-full border border-border bg-background px-2.5 py-1 text-[10px] font-semibold hover:border-neutral-900/60"
+              >
+                Otro día
+              </button>
+              <input
+                type="date"
+                value={createdAt || ""}
+                onChange={(e) => setCreatedAt(e.target.value || undefined)}
+                className="h-7 rounded-md border border-border bg-background px-2 text-[10px] font-medium text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-neutral-900"
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Button */}

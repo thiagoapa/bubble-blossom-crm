@@ -24,7 +24,7 @@ export const PHASES: PhaseConfig[] = [
   },
   {
     key: "primeira",
-    label: "1ª Contato",
+    label: "1R",
     emoji: "🟡",
     colorClass: "bg-phase-primeira",
     textClass: "text-white",
@@ -34,7 +34,7 @@ export const PHASES: PhaseConfig[] = [
   },
   {
     key: "segunda",
-    label: "2ª Contato",
+    label: "2R",
     emoji: "🟠",
     colorClass: "bg-phase-segunda",
     textClass: "text-white",
