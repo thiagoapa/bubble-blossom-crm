@@ -1,5 +1,6 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
+import { LogOut } from "lucide-react";
 import { useContacts } from "@/hooks/useContacts";
 import type { Contact, Phase } from "@/hooks/useContacts";
 import { PHASES } from "@/lib/phases";
@@ -10,8 +11,11 @@ import { BubbleDetailPanel } from "@/components/BubbleDetailPanel";
 import { ManualGroupArea } from "@/components/ManualGroupArea";
 import { ActivityCalendar } from "@/components/dashboard/ActivityCalendar";
 import { PipelineFunnel } from "@/components/PipelineFunnel";
+import { LoginScreen, useAuth } from "@/components/LoginScreen";
 
 const Index = () => {
+  const { authed, login, logout } = useAuth();
+
   const {
     contacts,
     groups,
@@ -52,6 +56,11 @@ const Index = () => {
     [changePhase]
   );
 
+  // ── Show login if not authenticated ──────────────────────────────────────
+  if (!authed) {
+    return <LoginScreen onLogin={login} />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col text-foreground">
       {/* ─── Header ─── */}
@@ -75,11 +84,21 @@ const Index = () => {
               </h1>
             </div>
           </div>
-          <div className="hidden text-[11px] text-muted-foreground sm:flex items-center gap-2">
-            <span className="h-1 w-1 rounded-full bg-emerald-400/80" />
-            <span>
-              {contacts.length} contacto{contacts.length !== 1 ? "s" : ""} en tu pipeline
-            </span>
+          <div className="flex items-center gap-3">
+            <div className="hidden text-[11px] text-muted-foreground sm:flex items-center gap-2">
+              <span className="h-1 w-1 rounded-full bg-emerald-400/80" />
+              <span>
+                {contacts.length} contacto{contacts.length !== 1 ? "s" : ""} en tu pipeline
+              </span>
+            </div>
+            <button
+              onClick={logout}
+              title="Sair"
+              className="flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-muted"
+            >
+              <LogOut size={13} />
+              <span className="hidden sm:inline">Sair</span>
+            </button>
           </div>
         </div>
       </motion.header>
@@ -100,23 +119,19 @@ const Index = () => {
             aria-label="Pipeline principal de contactos"
             className="rounded-2xl border border-border/70 bg-background/90 p-4 shadow-sm md:p-5"
           >
-            {/* Input + helper */}
             <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div className="space-y-1">
                 <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
                   Pipeline en vivo
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Crea un contacto y arrástralo entre columnas para reflejar el estado real de tus
-                  conversaciones.
+                  Crea un contacto y arrástralo entre columnas para reflejar el estado real de tus conversaciones.
                 </p>
               </div>
               <div className="w-full md:max-w-md">
                 <ContactInput onAdd={handleAddContact} />
               </div>
             </div>
-
-            {/* Columns */}
             <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-thin">
               {PHASES.map((phase) => (
                 <ContactColumn
@@ -131,7 +146,7 @@ const Index = () => {
             </div>
           </section>
 
-          {/* ─── Inverse Funnel ─── */}
+          {/* ── Both funnels ── */}
           <PipelineFunnel contactsByPhase={contactsByPhase} />
 
           {/* Stats block */}
@@ -140,7 +155,7 @@ const Index = () => {
             className="grid gap-4 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]"
           >
             <div className="rounded-2xl border border-border/70 bg-background/95 p-4 md:p-5">
-              <div className="mb-3 flex items-center justify-between gap-2">
+              <div className="mb-3">
                 <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
                   Progreso semanal y heatmap
                 </p>
@@ -154,36 +169,21 @@ const Index = () => {
                 heatmapDays={heatmapDays}
               />
             </div>
-
             <div className="grid gap-3 text-xs md:text-[13px]">
               <div className="rounded-2xl border border-border/70 bg-background/95 px-4 py-3">
-                <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
-                  Esta semana
-                </p>
-                <p className="mt-1 text-xl font-semibold">
-                  {weeklyCount}/{metaSemanal}
-                </p>
-                <p className="text-[11px] text-muted-foreground">
-                  Contactos hacia tu meta semanal.
-                </p>
+                <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">Esta semana</p>
+                <p className="mt-1 text-xl font-semibold">{weeklyCount}/{metaSemanal}</p>
+                <p className="text-[11px] text-muted-foreground">Contactos hacia tu meta semanal.</p>
               </div>
               <div className="rounded-2xl border border-border/70 bg-background/95 px-4 py-3">
-                <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
-                  Hoy
-                </p>
+                <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">Hoy</p>
                 <p className="mt-1 text-xl font-semibold">{todayCount}</p>
-                <p className="text-[11px] text-muted-foreground">
-                  Nuevas conversaciones activas registradas en el día.
-                </p>
+                <p className="text-[11px] text-muted-foreground">Nuevas conversaciones activas registradas en el día.</p>
               </div>
               <div className="rounded-2xl border border-border/70 bg-background/95 px-4 py-3">
-                <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
-                  Este mes
-                </p>
+                <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">Este mes</p>
                 <p className="mt-1 text-xl font-semibold">{monthCount}</p>
-                <p className="text-[11px] text-muted-foreground">
-                  Contactos tocados a lo largo del mes.
-                </p>
+                <p className="text-[11px] text-muted-foreground">Contactos tocados a lo largo del mes.</p>
               </div>
             </div>
           </section>
@@ -200,7 +200,6 @@ const Index = () => {
             />
           </section>
 
-          {/* Footer */}
           <motion.footer
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -216,7 +215,6 @@ const Index = () => {
         </div>
       </main>
 
-      {/* Detail panel */}
       <BubbleDetailPanel
         contact={selectedContact}
         onClose={() => setSelectedContact(null)}
