@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Sparkles } from "lucide-react";
 import { useContacts } from "@/hooks/useContacts";
@@ -11,6 +11,7 @@ import { BubbleDetailPanel } from "@/components/BubbleDetailPanel";
 import { ManualGroupArea } from "@/components/ManualGroupArea";
 import { WeeklyGoals } from "@/components/dashboard/WeeklyGoals";
 import { ActivityCalendar } from "@/components/dashboard/ActivityCalendar";
+import { getContacts } from "@/lib/api";
 
 const Index = () => {
   const {
@@ -34,6 +35,15 @@ const Index = () => {
 
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [newContactId, setNewContactId] = useState<string | null>(null);
+
+useEffect(() => {
+  async function loadContacts() {
+    const data = await getContacts();
+    console.log("contacts from API:", data);
+  }
+
+  loadContacts();
+}, []);
 
   const handleAddContact = useCallback(
     (nombre: string, telefono?: string, createdAt?: string) => {
