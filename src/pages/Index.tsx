@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Sparkles } from "lucide-react";
 import { useContacts } from "@/hooks/useContacts";
 import type { Contact, Phase } from "@/hooks/useContacts";
 import { PHASES } from "@/lib/phases";
@@ -9,9 +8,8 @@ import { ContactInput } from "@/components/ContactInput";
 import { ContactColumn } from "@/components/ContactColumn";
 import { BubbleDetailPanel } from "@/components/BubbleDetailPanel";
 import { ManualGroupArea } from "@/components/ManualGroupArea";
-import { WeeklyGoals } from "@/components/dashboard/WeeklyGoals";
 import { ActivityCalendar } from "@/components/dashboard/ActivityCalendar";
-import { getContacts } from "@/lib/api";
+import { PipelineFunnel } from "@/components/PipelineFunnel";
 
 const Index = () => {
   const {
@@ -36,20 +34,13 @@ const Index = () => {
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [newContactId, setNewContactId] = useState<string | null>(null);
 
-useEffect(() => {
-  async function loadContacts() {
-    const data = await getContacts();
-    console.log("contacts from API:", data);
-  }
-
-  loadContacts();
-}, []);
-
   const handleAddContact = useCallback(
     (nombre: string, telefono?: string, createdAt?: string) => {
       const c = addContact(nombre, telefono, createdAt);
-      setNewContactId(c.id);
-      setTimeout(() => setNewContactId(null), 2000);
+      Promise.resolve(c).then((contact) => {
+        setNewContactId(contact.id);
+        setTimeout(() => setNewContactId(null), 2000);
+      });
     },
     [addContact]
   );
@@ -63,7 +54,7 @@ useEffect(() => {
 
   return (
     <div className="min-h-screen flex flex-col text-foreground">
-      {/* ─── Compact hero ─── */}
+      {/* ─── Header ─── */}
       <motion.header
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -72,10 +63,8 @@ useEffect(() => {
       >
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-4 md:px-6 lg:px-8">
           <div className="flex items-center gap-2">
-            <div className="relative">
-              <div className="flex h-8 w-8 items-center justify-center rounded-2xl bg-neutral-900 text-white shadow-sm">
-                <span className="text-base leading-none">🫧</span>
-              </div>
+            <div className="flex h-8 w-8 items-center justify-center rounded-2xl bg-neutral-900 text-white shadow-sm">
+              <span className="text-base leading-none">🫧</span>
             </div>
             <div className="flex flex-col">
               <span className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
@@ -95,11 +84,9 @@ useEffect(() => {
         </div>
       </motion.header>
 
-      {/* ─── Main content: pipeline as hero ─── */}
+      {/* ─── Main content ─── */}
       <main className="flex-1">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 pb-10 pt-6 md:px-6 lg:px-8">
-          {/* Weekly goals */}
-          <WeeklyGoals contacts={contacts} />
 
           {/* Activity calendar */}
           <ActivityCalendar
@@ -129,7 +116,7 @@ useEffect(() => {
               </div>
             </div>
 
-            {/* Columns as central hero */}
+            {/* Columns */}
             <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-thin">
               {PHASES.map((phase) => (
                 <ContactColumn
@@ -144,7 +131,10 @@ useEffect(() => {
             </div>
           </section>
 
-          {/* Stats block below pipeline */}
+          {/* ─── Inverse Funnel ─── */}
+          <PipelineFunnel contactsByPhase={contactsByPhase} />
+
+          {/* Stats block */}
           <section
             aria-label="Estadísticas y actividad reciente"
             className="grid gap-4 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]"
@@ -198,7 +188,7 @@ useEffect(() => {
             </div>
           </section>
 
-          {/* Manual groups section */}
+          {/* Manual groups */}
           <section aria-label="Mapa mental de agrupaciones personales">
             <ManualGroupArea
               contacts={contacts}
@@ -210,7 +200,7 @@ useEffect(() => {
             />
           </section>
 
-          {/* Helper footer */}
+          {/* Footer */}
           <motion.footer
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
