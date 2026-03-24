@@ -3,13 +3,14 @@ import { motion } from "framer-motion";
 import { LogOut } from "lucide-react";
 import { useContacts } from "@/hooks/useContacts";
 import type { Contact, Phase } from "@/hooks/useContacts";
-import { PHASES } from "@/lib/phases";
+import { PIPELINE_PHASES } from "@/lib/phases";
 import { ProgressHeader } from "@/components/ProgressHeader";
 import { ContactInput } from "@/components/ContactInput";
 import { ContactColumn } from "@/components/ContactColumn";
 import { BubbleDetailPanel } from "@/components/BubbleDetailPanel";
 import { ManualGroupArea } from "@/components/ManualGroupArea";
 import { ActivityCalendar } from "@/components/dashboard/ActivityCalendar";
+import { AguardandoResposta } from "@/components/dashboard/AguardandoResposta";
 import { PipelineFunnel } from "@/components/PipelineFunnel";
 import { LoginScreen, useAuth } from "@/components/LoginScreen";
 
@@ -21,6 +22,7 @@ const Index = () => {
     todayCount, monthCount, heatmapDays, contactsByPhase,
     addContact, changePhase, deleteContact,
     addGroup, addContactToGroup, removeContactFromGroup, deleteGroup,
+    toggleAguardando,
   } = useContacts();
 
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
@@ -82,6 +84,13 @@ const Index = () => {
             onChangePhase={(id, fase) => changePhase(id, fase)}
           />
 
+          <AguardandoResposta
+            contacts={contacts}
+            onChangePhase={changePhase}
+            onContactClick={setSelectedContact}
+            onToggleAguardando={toggleAguardando}
+          />
+
           <section aria-label="Pipeline principal de contactos" className="rounded-2xl border border-border/70 bg-background/90 p-4 shadow-sm md:p-5">
             <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div className="space-y-1">
@@ -93,7 +102,7 @@ const Index = () => {
               </div>
             </div>
             <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-thin">
-              {PHASES.map((phase) => (
+              {PIPELINE_PHASES.map((phase) => (
                 <ContactColumn
                   key={phase.key}
                   config={phase}
@@ -106,7 +115,6 @@ const Index = () => {
             </div>
           </section>
 
-          {/* Both funnels — pass allContacts for cumulative logic */}
           <PipelineFunnel contactsByPhase={contactsByPhase} allContacts={contacts} />
 
           <section aria-label="Estadísticas" className="grid gap-4 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
@@ -171,6 +179,7 @@ const Index = () => {
         onClose={() => setSelectedContact(null)}
         onPhaseChange={(id, fase) => { changePhase(id, fase); setSelectedContact(null); }}
         onDelete={deleteContact}
+        onToggleAguardando={toggleAguardando}
       />
     </div>
   );
