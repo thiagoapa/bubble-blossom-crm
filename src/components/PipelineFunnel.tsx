@@ -19,14 +19,11 @@ function FunnelRow({
       transition={{ delay: index * 0.06, type: "spring", stiffness: 260, damping: 26 }}
       className="flex items-center gap-3 w-full"
     >
-      {/* Label */}
       <div className="w-36 text-right shrink-0">
         <span className="text-xs font-medium" style={{ color }}>
           {emoji} {label}
         </span>
       </div>
-
-      {/* Bar */}
       <div className="flex-1 flex justify-center">
         <div
           className="relative flex items-center justify-center rounded-full h-9 transition-all duration-500"
@@ -35,8 +32,6 @@ function FunnelRow({
           <span className="text-sm font-bold" style={{ color }}>{count}</span>
         </div>
       </div>
-
-      {/* % or "topo" */}
       <div className="w-14 shrink-0">
         {isTop ? (
           <span className="text-[10px] text-muted-foreground/50">topo</span>
@@ -57,22 +52,20 @@ function FunnelRow({
 }
 
 export function PipelineFunnel({ contactsByPhase, allContacts }: PipelineFunnelProps) {
-  // ── Cumulative counts for leads funnel ──────────────────────────────────
-  // A contact in a later phase also counts in all earlier phases
-  const inPrimeira  = contactsByPhase("primeira").length;
-  const inSegunda   = contactsByPhase("segunda").length;
-  const inFollowup  = contactsByPhase("followup").length;
-  const inCaptacao  = contactsByPhase("comprador").length; // captacao = final lead phase (before buyer funnel)
-  // NOTE: once you add "captacao" as a real Phase, replace the line above
+  // ── Cumulative counts ─────────────────────────────────────────────────────
+  // Everyone starts as novos — total contacts = topo of funnel
+  const totalNovos    = allContacts.filter(c => c.fase !== "comprador").length; // exclude buyer funnel
+  const inPrimeira    = contactsByPhase("primeira").length;
+  const inSegunda     = contactsByPhase("segunda").length;
+  const inFollowup    = contactsByPhase("followup").length;
+  const inCaptacao    = contactsByPhase("captacao").length;
 
-  // Total contacts ever = all contacts (everyone started as novo)
-  const totalNovos   = allContacts.length;
-  const total1R      = inPrimeira + inSegunda + inFollowup + inCaptacao;
-  const total2R      = inSegunda + inFollowup + inCaptacao;
+  // Cumulative: each phase = contacts in that phase + all phases beyond it
+  const total1R       = inPrimeira + inSegunda + inFollowup + inCaptacao;
+  const total2R       = inSegunda + inFollowup + inCaptacao;
   const totalFollowup = inFollowup + inCaptacao;
   const totalCaptacao = inCaptacao;
 
-  // Max for bar width scaling
   const maxLeads = Math.max(totalNovos, 1);
 
   function pct(current: number, prev: number): number {
@@ -81,24 +74,21 @@ export function PipelineFunnel({ contactsByPhase, allContacts }: PipelineFunnelP
   }
 
   const leadsPhases = [
-    { label: "Novos Contatos", emoji: "🟣", color: "#8b5cf6", bg: "rgba(139,92,246,0.10)", border: "rgba(139,92,246,0.30)", count: totalNovos,    prev: null },
+    { label: "Novos Contatos",  emoji: "🟣", color: "#8b5cf6", bg: "rgba(139,92,246,0.10)", border: "rgba(139,92,246,0.30)", count: totalNovos,    prev: null },
     { label: "1ª Reunião (1R)", emoji: "🟡", color: "#eab308", bg: "rgba(234,179,8,0.10)",  border: "rgba(234,179,8,0.30)",  count: total1R,       prev: totalNovos },
     { label: "2ª Reunião (2R)", emoji: "🟠", color: "#f97316", bg: "rgba(249,115,22,0.10)", border: "rgba(249,115,22,0.30)", count: total2R,       prev: total1R },
     { label: "Follow-up",       emoji: "🔵", color: "#3b82f6", bg: "rgba(59,130,246,0.10)", border: "rgba(59,130,246,0.30)", count: totalFollowup, prev: total2R },
     { label: "Captação",        emoji: "🎯", color: "#a855f7", bg: "rgba(168,85,247,0.12)", border: "rgba(168,85,247,0.35)", count: totalCaptacao, prev: totalFollowup },
   ];
 
-  // ── Buyer funnel (independent) ───────────────────────────────────────────
+  // ── Buyer funnel (independent) ────────────────────────────────────────────
   const totalComprador = contactsByPhase("comprador").length;
-  // visita and comprou are future phases — hardcoded 0 for now
-  const totalVisita = 0;
-  const totalComprou = 0;
   const maxBuyer = Math.max(totalComprador, 1);
 
   const buyerPhases = [
-    { label: "Comprador",    emoji: "🟢", color: "#22c55e", bg: "rgba(34,197,94,0.12)",  border: "rgba(34,197,94,0.35)",  count: totalComprador, prev: null },
-    { label: "Visita Imóvel",emoji: "🏠", color: "#14b8a6", bg: "rgba(20,184,166,0.10)", border: "rgba(20,184,166,0.30)", count: totalVisita,    prev: totalComprador },
-    { label: "Comprou ✨",   emoji: "🏆", color: "#f59e0b", bg: "rgba(245,158,11,0.13)", border: "rgba(245,158,11,0.40)", count: totalComprou,   prev: totalVisita },
+    { label: "Comprador",     emoji: "🟢", color: "#22c55e", bg: "rgba(34,197,94,0.12)",  border: "rgba(34,197,94,0.35)",  count: totalComprador, prev: null },
+    { label: "Visita Imóvel", emoji: "🏠", color: "#14b8a6", bg: "rgba(20,184,166,0.10)", border: "rgba(20,184,166,0.30)", count: 0,              prev: totalComprador },
+    { label: "Comprou ✨",    emoji: "🏆", color: "#f59e0b", bg: "rgba(245,158,11,0.13)", border: "rgba(245,158,11,0.40)", count: 0,              prev: 0 },
   ];
 
   return (
