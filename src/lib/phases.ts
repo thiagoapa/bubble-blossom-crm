@@ -4,11 +4,11 @@ export interface PhaseConfig {
   key: Phase;
   label: string;
   emoji: string;
-  colorClass: string;     // Tailwind bg class for bubbles
-  textClass: string;      // Tailwind text class for bubble labels
-  headerColor: string;    // hex for column header
-  bgClass: string;        // Tailwind bg for column area
-  borderClass: string;    // Tailwind border class
+  colorClass: string;
+  textClass: string;
+  headerColor: string;
+  bgClass: string;
+  borderClass: string;
 }
 
 export const PHASES: PhaseConfig[] = [
@@ -51,6 +51,16 @@ export const PHASES: PhaseConfig[] = [
     headerColor: "#6A9EC4",
     bgClass: "bg-colbg-followup",
     borderClass: "border-phase-followup",
+  },
+  {
+    key: "captacao",
+    label: "Captação",
+    emoji: "🎯",
+    colorClass: "bg-phase-captacao",
+    textClass: "text-white",
+    headerColor: "#a855f7",
+    bgClass: "bg-colbg-captacao",
+    borderClass: "border-phase-captacao",
   },
   {
     key: "comprador",
