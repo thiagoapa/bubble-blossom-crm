@@ -3,29 +3,14 @@ import type { Contact, Phase } from "@/hooks/useContacts";
 
 interface PipelineFunnelProps {
   contactsByPhase: (fase: Phase) => Contact[];
+  allContacts: Contact[];
 }
 
-const LEADS_FUNNEL = [
-  { key: "novos" as Phase, label: "Novos Contatos", emoji: "🟣", color: "#8b5cf6", bg: "rgba(139,92,246,0.10)", border: "rgba(139,92,246,0.30)", widthPct: 100 },
-  { key: "primeira" as Phase, label: "1ª Reunião (1R)", emoji: "🟡", color: "#eab308", bg: "rgba(234,179,8,0.10)", border: "rgba(234,179,8,0.30)", widthPct: 80 },
-  { key: "segunda" as Phase, label: "2ª Reunião (2R)", emoji: "🟠", color: "#f97316", bg: "rgba(249,115,22,0.10)", border: "rgba(249,115,22,0.30)", widthPct: 60 },
-  { key: "followup" as Phase, label: "Follow-up", emoji: "🔵", color: "#3b82f6", bg: "rgba(59,130,246,0.10)", border: "rgba(59,130,246,0.30)", widthPct: 40 },
-  { key: "captacao" as const, label: "Captação", emoji: "🎯", color: "#a855f7", bg: "rgba(168,85,247,0.12)", border: "rgba(168,85,247,0.35)", widthPct: 22 },
-];
-
-const BUYER_FUNNEL = [
-  { key: "comprador" as Phase, label: "Comprador", emoji: "🟢", color: "#22c55e", bg: "rgba(34,197,94,0.12)", border: "rgba(34,197,94,0.35)", widthPct: 100 },
-  { key: "visita" as const, label: "Visita Imóvel", emoji: "🏠", color: "#14b8a6", bg: "rgba(20,184,166,0.10)", border: "rgba(20,184,166,0.30)", widthPct: 65 },
-  { key: "comprou" as const, label: "Comprou ✨", emoji: "🏆", color: "#f59e0b", bg: "rgba(245,158,11,0.13)", border: "rgba(245,158,11,0.40)", widthPct: 35 },
-];
-
 function FunnelRow({
-  phase, count, convRate, index,
+  label, emoji, color, bg, border, widthPct, count, convRate, isTop, index,
 }: {
-  phase: { key: string; label: string; emoji: string; color: string; bg: string; border: string; widthPct: number };
-  count: number;
-  convRate: number | null;
-  index: number;
+  label: string; emoji: string; color: string; bg: string; border: string;
+  widthPct: number; count: number; convRate: number | null; isTop: boolean; index: number;
 }) {
   return (
     <motion.div
@@ -34,70 +19,109 @@ function FunnelRow({
       transition={{ delay: index * 0.06, type: "spring", stiffness: 260, damping: 26 }}
       className="flex items-center gap-3 w-full"
     >
+      {/* Label */}
       <div className="w-36 text-right shrink-0">
-        <span className="text-xs font-medium" style={{ color: phase.color }}>
-          {phase.emoji} {phase.label}
+        <span className="text-xs font-medium" style={{ color }}>
+          {emoji} {label}
         </span>
       </div>
+
+      {/* Bar */}
       <div className="flex-1 flex justify-center">
         <div
-          className="relative flex items-center justify-center rounded-full h-9"
-          style={{ width: `${phase.widthPct}%`, background: phase.bg, border: `1.5px solid ${phase.border}` }}
+          className="relative flex items-center justify-center rounded-full h-9 transition-all duration-500"
+          style={{ width: `${widthPct}%`, background: bg, border: `1.5px solid ${border}` }}
         >
-          <span className="text-sm font-bold" style={{ color: phase.color }}>{count}</span>
+          <span className="text-sm font-bold" style={{ color }}>{count}</span>
         </div>
       </div>
+
+      {/* % or "topo" */}
       <div className="w-14 shrink-0">
-        {convRate !== null ? (
+        {isTop ? (
+          <span className="text-[10px] text-muted-foreground/50">topo</span>
+        ) : (
           <span
             className="text-[10px] font-medium px-1.5 py-0.5 rounded-full"
             style={{
-              color: convRate >= 50 ? "#22c55e" : convRate >= 25 ? "#f97316" : "#ef4444",
-              background: convRate >= 50 ? "rgba(34,197,94,0.12)" : convRate >= 25 ? "rgba(249,115,22,0.12)" : "rgba(239,68,68,0.12)",
+              color: (convRate ?? 0) >= 50 ? "#22c55e" : (convRate ?? 0) >= 25 ? "#f97316" : "#ef4444",
+              background: (convRate ?? 0) >= 50 ? "rgba(34,197,94,0.12)" : (convRate ?? 0) >= 25 ? "rgba(249,115,22,0.12)" : "rgba(239,68,68,0.12)",
             }}
           >
-            {convRate}%
+            {convRate ?? 0}%
           </span>
-        ) : (
-          <span className="text-[10px] text-muted-foreground/50">topo</span>
         )}
       </div>
     </motion.div>
   );
 }
 
-export function PipelineFunnel({ contactsByPhase }: PipelineFunnelProps) {
-  const counts: Record<string, number> = {
-    novos: contactsByPhase("novos").length,
-    primeira: contactsByPhase("primeira").length,
-    segunda: contactsByPhase("segunda").length,
-    followup: contactsByPhase("followup").length,
-    captacao: 0,
-    comprador: contactsByPhase("comprador").length,
-    visita: 0,
-    comprou: 0,
-  };
+export function PipelineFunnel({ contactsByPhase, allContacts }: PipelineFunnelProps) {
+  // ── Cumulative counts for leads funnel ──────────────────────────────────
+  // A contact in a later phase also counts in all earlier phases
+  const inPrimeira  = contactsByPhase("primeira").length;
+  const inSegunda   = contactsByPhase("segunda").length;
+  const inFollowup  = contactsByPhase("followup").length;
+  const inCaptacao  = contactsByPhase("comprador").length; // captacao = final lead phase (before buyer funnel)
+  // NOTE: once you add "captacao" as a real Phase, replace the line above
 
-  function getConvRate(current: number, prevCount: number | null) {
-    if (prevCount === null || prevCount === 0) return null;
-    return Math.round((current / prevCount) * 100);
+  // Total contacts ever = all contacts (everyone started as novo)
+  const totalNovos   = allContacts.length;
+  const total1R      = inPrimeira + inSegunda + inFollowup + inCaptacao;
+  const total2R      = inSegunda + inFollowup + inCaptacao;
+  const totalFollowup = inFollowup + inCaptacao;
+  const totalCaptacao = inCaptacao;
+
+  // Max for bar width scaling
+  const maxLeads = Math.max(totalNovos, 1);
+
+  function pct(current: number, prev: number): number {
+    if (prev === 0) return 0;
+    return Math.round((current / prev) * 100);
   }
+
+  const leadsPhases = [
+    { label: "Novos Contatos", emoji: "🟣", color: "#8b5cf6", bg: "rgba(139,92,246,0.10)", border: "rgba(139,92,246,0.30)", count: totalNovos,    prev: null },
+    { label: "1ª Reunião (1R)", emoji: "🟡", color: "#eab308", bg: "rgba(234,179,8,0.10)",  border: "rgba(234,179,8,0.30)",  count: total1R,       prev: totalNovos },
+    { label: "2ª Reunião (2R)", emoji: "🟠", color: "#f97316", bg: "rgba(249,115,22,0.10)", border: "rgba(249,115,22,0.30)", count: total2R,       prev: total1R },
+    { label: "Follow-up",       emoji: "🔵", color: "#3b82f6", bg: "rgba(59,130,246,0.10)", border: "rgba(59,130,246,0.30)", count: totalFollowup, prev: total2R },
+    { label: "Captação",        emoji: "🎯", color: "#a855f7", bg: "rgba(168,85,247,0.12)", border: "rgba(168,85,247,0.35)", count: totalCaptacao, prev: totalFollowup },
+  ];
+
+  // ── Buyer funnel (independent) ───────────────────────────────────────────
+  const totalComprador = contactsByPhase("comprador").length;
+  // visita and comprou are future phases — hardcoded 0 for now
+  const totalVisita = 0;
+  const totalComprou = 0;
+  const maxBuyer = Math.max(totalComprador, 1);
+
+  const buyerPhases = [
+    { label: "Comprador",    emoji: "🟢", color: "#22c55e", bg: "rgba(34,197,94,0.12)",  border: "rgba(34,197,94,0.35)",  count: totalComprador, prev: null },
+    { label: "Visita Imóvel",emoji: "🏠", color: "#14b8a6", bg: "rgba(20,184,166,0.10)", border: "rgba(20,184,166,0.30)", count: totalVisita,    prev: totalComprador },
+    { label: "Comprou ✨",   emoji: "🏆", color: "#f59e0b", bg: "rgba(245,158,11,0.13)", border: "rgba(245,158,11,0.40)", count: totalComprou,   prev: totalVisita },
+  ];
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Leads funnel */}
+      {/* ── Leads funnel ── */}
       <section className="rounded-2xl border border-border/70 bg-background/95 p-4 md:p-5">
         <div className="mb-4">
           <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Funil de Leads</p>
-          <p className="text-xs text-muted-foreground mt-0.5">Conversão do primeiro contato ao follow-up</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Acumulativo — cada fase inclui todos os contatos que chegaram até ela ou além</p>
         </div>
         <div className="flex flex-col items-center gap-1.5 w-full">
-          {LEADS_FUNNEL.map((phase, i) => (
+          {leadsPhases.map((phase, i) => (
             <FunnelRow
-              key={phase.key}
-              phase={phase}
-              count={counts[phase.key] ?? 0}
-              convRate={getConvRate(counts[phase.key] ?? 0, i > 0 ? counts[LEADS_FUNNEL[i - 1].key] ?? 0 : null)}
+              key={phase.label}
+              label={phase.label}
+              emoji={phase.emoji}
+              color={phase.color}
+              bg={phase.bg}
+              border={phase.border}
+              widthPct={Math.max((phase.count / maxLeads) * 100, 8)}
+              count={phase.count}
+              convRate={phase.prev !== null ? pct(phase.count, phase.prev) : null}
+              isTop={phase.prev === null}
               index={i}
             />
           ))}
@@ -107,25 +131,31 @@ export function PipelineFunnel({ contactsByPhase }: PipelineFunnelProps) {
         </p>
       </section>
 
-      {/* Buyer funnel */}
+      {/* ── Buyer funnel ── */}
       <section className="rounded-2xl border border-border/70 bg-background/95 p-4 md:p-5">
         <div className="mb-4">
           <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Funil de Compradores</p>
           <p className="text-xs text-muted-foreground mt-0.5">Do comprador qualificado ao negócio fechado</p>
         </div>
         <div className="flex flex-col items-center gap-1.5 w-full">
-          {BUYER_FUNNEL.map((phase, i) => (
+          {buyerPhases.map((phase, i) => (
             <FunnelRow
-              key={phase.key}
-              phase={phase}
-              count={counts[phase.key] ?? 0}
-              convRate={getConvRate(counts[phase.key] ?? 0, i > 0 ? counts[BUYER_FUNNEL[i - 1].key] ?? 0 : null)}
+              key={phase.label}
+              label={phase.label}
+              emoji={phase.emoji}
+              color={phase.color}
+              bg={phase.bg}
+              border={phase.border}
+              widthPct={Math.max((phase.count / maxBuyer) * 100, 8)}
+              count={phase.count}
+              convRate={phase.prev !== null ? pct(phase.count, phase.prev) : null}
+              isTop={phase.prev === null}
               index={i}
             />
           ))}
         </div>
         <p className="mt-3 text-center text-[10px] text-muted-foreground">
-          % = conversão da fase anterior · Visita e Comprou: fases futuras
+          % = conversão da fase anterior
         </p>
       </section>
     </div>
