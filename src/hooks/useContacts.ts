@@ -3,7 +3,8 @@ import { getToken } from "@/components/LoginScreen";
 
 const API_BASE = "https://crm.project28.cloud/api";
 
-export type Phase = "novos" | "primeira" | "segunda" | "followup" | "captacao" | "comprador";
+export type Phase = "novos" | "primeira" | "segunda" | "followup" | 
+  "captacao" | "comprador" | "enviei_imoveis" | "visita_imovel" | "comprou";
 
 export interface Contact {
   id: string;
