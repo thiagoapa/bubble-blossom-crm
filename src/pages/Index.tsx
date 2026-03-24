@@ -44,7 +44,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col text-foreground">
-      <motion.header initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 260, damping: 28 }} className="border-b border-border/60 bg-background/80 backdrop-blur-xl">
+      <motion.header
+        initial={{ opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 260, damping: 28 }}
+        className="border-b border-border/60 bg-background/80 backdrop-blur-xl"
+      >
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-4 md:px-6 lg:px-8">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-2xl bg-neutral-900 text-white shadow-sm">
@@ -71,7 +76,11 @@ const Index = () => {
       <main className="flex-1">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 pb-10 pt-6 md:px-6 lg:px-8">
 
-          <ActivityCalendar contacts={contacts} onDeleteContact={deleteContact} onChangePhase={(id, fase) => changePhase(id, fase)} />
+          <ActivityCalendar
+            contacts={contacts}
+            onDeleteContact={deleteContact}
+            onChangePhase={(id, fase) => changePhase(id, fase)}
+          />
 
           <section aria-label="Pipeline principal de contactos" className="rounded-2xl border border-border/70 bg-background/90 p-4 shadow-sm md:p-5">
             <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -85,17 +94,32 @@ const Index = () => {
             </div>
             <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-thin">
               {PHASES.map((phase) => (
-                <ContactColumn key={phase.key} config={phase} contacts={contactsByPhase(phase.key)} onBubbleClick={setSelectedContact} onDrop={handleDrop} newContactId={newContactId} />
+                <ContactColumn
+                  key={phase.key}
+                  config={phase}
+                  contacts={contactsByPhase(phase.key)}
+                  onBubbleClick={setSelectedContact}
+                  onDrop={handleDrop}
+                  newContactId={newContactId}
+                />
               ))}
             </div>
           </section>
 
-          <PipelineFunnel contactsByPhase={contactsByPhase} />
+          {/* Both funnels — pass allContacts for cumulative logic */}
+          <PipelineFunnel contactsByPhase={contactsByPhase} allContacts={contacts} />
 
           <section aria-label="Estadísticas" className="grid gap-4 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
             <div className="rounded-2xl border border-border/70 bg-background/95 p-4 md:p-5">
               <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground mb-3">Progreso semanal y heatmap</p>
-              <ProgressHeader weeklyCount={weeklyCount} metaSemanal={metaSemanal} weekProgress={weekProgress} todayCount={todayCount} monthCount={monthCount} heatmapDays={heatmapDays} />
+              <ProgressHeader
+                weeklyCount={weeklyCount}
+                metaSemanal={metaSemanal}
+                weekProgress={weekProgress}
+                todayCount={todayCount}
+                monthCount={monthCount}
+                heatmapDays={heatmapDays}
+              />
             </div>
             <div className="grid gap-3">
               <div className="rounded-2xl border border-border/70 bg-background/95 px-4 py-3">
@@ -117,10 +141,22 @@ const Index = () => {
           </section>
 
           <section aria-label="Mapa mental">
-            <ManualGroupArea contacts={contacts} groups={groups} onAddGroup={addGroup} onDeleteGroup={deleteGroup} onAddContactToGroup={addContactToGroup} onRemoveContactFromGroup={removeContactFromGroup} />
+            <ManualGroupArea
+              contacts={contacts}
+              groups={groups}
+              onAddGroup={addGroup}
+              onDeleteGroup={deleteGroup}
+              onAddContactToGroup={addContactToGroup}
+              onRemoveContactFromGroup={removeContactFromGroup}
+            />
           </section>
 
-          <motion.footer initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="flex items-center justify-center gap-2 pb-4 text-[10px] text-muted-foreground">
+          <motion.footer
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="flex items-center justify-center gap-2 pb-4 text-[10px] text-muted-foreground"
+          >
             <span className="inline-block h-1 w-1 rounded-full bg-primary/40" />
             Arrastra burbujas entre columnas para cambiar de fase
             <span className="inline-block h-1 w-1 rounded-full bg-primary/40" />
@@ -130,7 +166,12 @@ const Index = () => {
         </div>
       </main>
 
-      <BubbleDetailPanel contact={selectedContact} onClose={() => setSelectedContact(null)} onPhaseChange={(id, fase) => { changePhase(id, fase); setSelectedContact(null); }} onDelete={deleteContact} />
+      <BubbleDetailPanel
+        contact={selectedContact}
+        onClose={() => setSelectedContact(null)}
+        onPhaseChange={(id, fase) => { changePhase(id, fase); setSelectedContact(null); }}
+        onDelete={deleteContact}
+      />
     </div>
   );
 };
