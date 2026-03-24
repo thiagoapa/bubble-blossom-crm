@@ -16,6 +16,7 @@ export interface Contact {
   firstMeetingDate?: string;
   secondMeetingDate?: string;
   trelloUrl?: string;
+  aguardandoResposta?: boolean;
 }
 
 export interface ManualGroup {
@@ -53,6 +54,7 @@ function mapFromApi(c: {
   firstMeetingDate?: string;
   secondMeetingDate?: string;
   trelloUrl?: string;
+  aguardandoResposta?: boolean;
 }): Contact {
   const dateStr =
     c.fecha ? c.fecha.split("T")[0]
@@ -70,6 +72,7 @@ function mapFromApi(c: {
     firstMeetingDate: c.firstMeetingDate,
     secondMeetingDate: c.secondMeetingDate,
     trelloUrl: c.trelloUrl,
+    aguardandoResposta: c.aguardandoResposta ?? false,
   };
 }
 
@@ -162,6 +165,19 @@ export function useContacts() {
     } catch (err) { console.error("Error deleting contact:", err); }
   }, []);
 
+  const toggleAguardando = useCallback(async (id: string, value: boolean) => {
+    setContacts((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, aguardandoResposta: value } : c))
+    );
+    try {
+      await fetch(`${API_BASE}/contacts/${id}`, {
+        method: "PATCH",
+        headers: authHeaders(),
+        body: JSON.stringify({ aguardandoResposta: value }),
+      });
+    } catch (err) { console.error("Error toggling aguardando:", err); }
+  }, []);
+
   const addGroup = useCallback((nombre: string) => {
     setGroups((prev) => [...prev, { id: crypto.randomUUID(), nombre, contactIds: [] }]);
   }, []);
@@ -184,5 +200,6 @@ export function useContacts() {
     contacts: contactosNormalizados, groups, loading, metaSemanal, weeklyCount, weekProgress,
     todayCount, monthCount, heatmapDays, contactsByPhase, addContact, changePhase,
     deleteContact, addGroup, addContactToGroup, removeContactFromGroup, deleteGroup,
+    toggleAguardando,
   };
 }
