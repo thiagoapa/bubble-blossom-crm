@@ -64,7 +64,7 @@ export const PHASES: PhaseConfig[] = [
   },
   {
     key: "comprador",
-    label: "Comprador 🏆",
+    label: "Comprador",
     emoji: "🟢",
     colorClass: "bg-phase-comprador",
     textClass: "text-white",
@@ -72,6 +72,41 @@ export const PHASES: PhaseConfig[] = [
     bgClass: "bg-colbg-comprador",
     borderClass: "border-phase-comprador",
   },
+  {
+    key: "enviei_imoveis",
+    label: "Enviei Imóveis",
+    emoji: "🏘️",
+    colorClass: "bg-phase-comprador",
+    textClass: "text-white",
+    headerColor: "#06b6d4",
+    bgClass: "bg-colbg-comprador",
+    borderClass: "border-phase-comprador",
+  },
+  {
+    key: "visita_imovel",
+    label: "Visita Imóvel",
+    emoji: "🏠",
+    colorClass: "bg-phase-comprador",
+    textClass: "text-white",
+    headerColor: "#14b8a6",
+    bgClass: "bg-colbg-comprador",
+    borderClass: "border-phase-comprador",
+  },
+  {
+    key: "comprou",
+    label: "Comprou ✨",
+    emoji: "🏆",
+    colorClass: "bg-phase-comprador",
+    textClass: "text-white",
+    headerColor: "#f59e0b",
+    bgClass: "bg-colbg-comprador",
+    borderClass: "border-phase-comprador",
+  },
 ];
 
 export const PHASE_MAP = Object.fromEntries(PHASES.map((p) => [p.key, p])) as Record<Phase, PhaseConfig>;
+
+// Solo las fases que aparecen como columnas en el pipeline principal
+export const PIPELINE_PHASES = PHASES.filter(
+  (p) => !["enviei_imoveis", "visita_imovel", "comprou"].includes(p.key)
+);
