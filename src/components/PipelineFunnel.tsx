@@ -52,15 +52,12 @@ function FunnelRow({
 }
 
 export function PipelineFunnel({ contactsByPhase, allContacts }: PipelineFunnelProps) {
-  // ── Cumulative counts ─────────────────────────────────────────────────────
-  // Everyone starts as novos — total contacts = topo of funnel
-  const totalNovos    = allContacts.filter(c => c.fase !== "comprador").length; // exclude buyer funnel
+  const totalNovos    = allContacts.filter(c => !["comprador","enviei_imoveis","visita_imovel","comprou"].includes(c.fase)).length;
   const inPrimeira    = contactsByPhase("primeira").length;
   const inSegunda     = contactsByPhase("segunda").length;
   const inFollowup    = contactsByPhase("followup").length;
   const inCaptacao    = contactsByPhase("captacao").length;
 
-  // Cumulative: each phase = contacts in that phase + all phases beyond it
   const total1R       = inPrimeira + inSegunda + inFollowup + inCaptacao;
   const total2R       = inSegunda + inFollowup + inCaptacao;
   const totalFollowup = inFollowup + inCaptacao;
@@ -81,19 +78,24 @@ export function PipelineFunnel({ contactsByPhase, allContacts }: PipelineFunnelP
     { label: "Captação",        emoji: "🎯", color: "#a855f7", bg: "rgba(168,85,247,0.12)", border: "rgba(168,85,247,0.35)", count: totalCaptacao, prev: totalFollowup },
   ];
 
-  // ── Buyer funnel (independent) ────────────────────────────────────────────
-  const totalComprador = contactsByPhase("comprador").length;
+  // Buyer funnel — acumulativo
+  const totalComprador = contactsByPhase("comprador").length + contactsByPhase("enviei_imoveis").length + contactsByPhase("visita_imovel").length + contactsByPhase("comprou").length;
+  const totalEnviei    = contactsByPhase("enviei_imoveis").length + contactsByPhase("visita_imovel").length + contactsByPhase("comprou").length;
+  const totalVisita    = contactsByPhase("visita_imovel").length + contactsByPhase("comprou").length;
+  const totalComprou   = contactsByPhase("comprou").length;
+
   const maxBuyer = Math.max(totalComprador, 1);
 
   const buyerPhases = [
-    { label: "Comprador",     emoji: "🟢", color: "#22c55e", bg: "rgba(34,197,94,0.12)",  border: "rgba(34,197,94,0.35)",  count: totalComprador, prev: null },
-    { label: "Visita Imóvel", emoji: "🏠", color: "#14b8a6", bg: "rgba(20,184,166,0.10)", border: "rgba(20,184,166,0.30)", count: 0,              prev: totalComprador },
-    { label: "Comprou ✨",    emoji: "🏆", color: "#f59e0b", bg: "rgba(245,158,11,0.13)", border: "rgba(245,158,11,0.40)", count: 0,              prev: 0 },
+    { label: "Comprador",      emoji: "🟢",  color: "#22c55e", bg: "rgba(34,197,94,0.12)",  border: "rgba(34,197,94,0.35)",  count: totalComprador, prev: null },
+    { label: "Enviei Imóveis", emoji: "🏘️", color: "#06b6d4", bg: "rgba(6,182,212,0.10)",  border: "rgba(6,182,212,0.30)",  count: totalEnviei,    prev: totalComprador },
+    { label: "Visita Imóvel",  emoji: "🏠",  color: "#14b8a6", bg: "rgba(20,184,166,0.10)", border: "rgba(20,184,166,0.30)", count: totalVisita,    prev: totalEnviei },
+    { label: "Comprou ✨",     emoji: "🏆",  color: "#f59e0b", bg: "rgba(245,158,11,0.13)", border: "rgba(245,158,11,0.40)", count: totalComprou,   prev: totalVisita },
   ];
 
   return (
     <div className="flex flex-col gap-4">
-      {/* ── Leads funnel ── */}
+      {/* Leads funnel */}
       <section className="rounded-2xl border border-border/70 bg-background/95 p-4 md:p-5">
         <div className="mb-4">
           <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Funil de Leads</p>
@@ -116,12 +118,10 @@ export function PipelineFunnel({ contactsByPhase, allContacts }: PipelineFunnelP
             />
           ))}
         </div>
-        <p className="mt-3 text-center text-[10px] text-muted-foreground">
-          % = conversão da fase anterior
-        </p>
+        <p className="mt-3 text-center text-[10px] text-muted-foreground">% = conversão da fase anterior</p>
       </section>
 
-      {/* ── Buyer funnel ── */}
+      {/* Buyer funnel */}
       <section className="rounded-2xl border border-border/70 bg-background/95 p-4 md:p-5">
         <div className="mb-4">
           <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Funil de Compradores</p>
@@ -144,9 +144,7 @@ export function PipelineFunnel({ contactsByPhase, allContacts }: PipelineFunnelP
             />
           ))}
         </div>
-        <p className="mt-3 text-center text-[10px] text-muted-foreground">
-          % = conversão da fase anterior
-        </p>
+        <p className="mt-3 text-center text-[10px] text-muted-foreground">% = conversão da fase anterior</p>
       </section>
     </div>
   );
