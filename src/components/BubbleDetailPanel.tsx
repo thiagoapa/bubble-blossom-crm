@@ -8,6 +8,7 @@ interface BubbleDetailPanelProps {
   onClose: () => void;
   onPhaseChange: (id: string, fase: Phase) => void;
   onDelete: (id: string) => void;
+  onToggleAguardando?: (id: string, value: boolean) => void;
 }
 
 export function BubbleDetailPanel({
@@ -15,6 +16,7 @@ export function BubbleDetailPanel({
   onClose,
   onPhaseChange,
   onDelete,
+  onToggleAguardando,
 }: BubbleDetailPanelProps) {
   if (!contact) return null;
   const config = PHASE_MAP[contact.fase];
@@ -34,7 +36,6 @@ export function BubbleDetailPanel({
     <AnimatePresence>
       {contact && (
         <>
-          {/* Backdrop */}
           <motion.div
             key="backdrop"
             initial={{ opacity: 0 }}
@@ -45,7 +46,6 @@ export function BubbleDetailPanel({
             style={{ background: "hsl(var(--foreground) / 0.08)" }}
           />
 
-          {/* Panel */}
           <motion.div
             key="panel"
             initial={{ opacity: 0, scale: 0.80, y: 24 }}
@@ -58,15 +58,11 @@ export function BubbleDetailPanel({
               className="glass rounded-2xl shadow-panel w-full max-w-sm pointer-events-auto relative overflow-hidden"
               style={{ border: `1px solid ${config.headerColor}40` }}
             >
-              {/* Top accent bar */}
               <div
                 className="absolute top-0 left-0 right-0 h-1.5"
-                style={{
-                  background: `linear-gradient(90deg, ${config.headerColor}, ${config.headerColor}88)`,
-                }}
+                style={{ background: `linear-gradient(90deg, ${config.headerColor}, ${config.headerColor}88)` }}
               />
 
-              {/* Close */}
               <button
                 onClick={onClose}
                 className="absolute top-4 right-4 p-1.5 rounded-xl hover:bg-accent transition-colors z-10"
@@ -105,7 +101,7 @@ export function BubbleDetailPanel({
                 {/* Info rows */}
                 <div className="space-y-2 mb-5">
                   {contact.telefono && (
-                    <a
+                    
                       href={`tel:${contact.telefono}`}
                       className="flex items-center gap-2.5 text-sm text-foreground hover:text-primary transition-colors group"
                     >
@@ -123,11 +119,10 @@ export function BubbleDetailPanel({
                   </div>
                 </div>
 
-                {/* Separator */}
                 <div className="h-px bg-border/60 mb-4" />
 
                 {/* Phase change */}
-                <div className="mb-5">
+                <div className="mb-4">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2.5 flex items-center gap-1.5">
                     <Zap className="w-3 h-3" /> Cambiar fase
                   </p>
@@ -135,10 +130,7 @@ export function BubbleDetailPanel({
                     {PHASES.map((p) => (
                       <button
                         key={p.key}
-                        onClick={() => {
-                          onPhaseChange(contact.id, p.key);
-                          onClose();
-                        }}
+                        onClick={() => { onPhaseChange(contact.id, p.key); onClose(); }}
                         className={`
                           flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-full font-bold
                           transition-all duration-150
@@ -163,10 +155,24 @@ export function BubbleDetailPanel({
                   </div>
                 </div>
 
+                {/* Aguardando Resposta toggle */}
+                {onToggleAguardando && (
+                  <button
+                    onClick={() => onToggleAguardando(contact.id, !contact.aguardandoResposta)}
+                    className={`w-full mb-3 text-xs px-3 py-2 rounded-xl border font-semibold transition-colors ${
+                      contact.aguardandoResposta
+                        ? "bg-rose-100 text-rose-600 border-rose-200 dark:bg-rose-900/30 dark:border-rose-800"
+                        : "border-border text-muted-foreground hover:border-rose-300 hover:text-rose-500"
+                    }`}
+                  >
+                    {contact.aguardandoResposta ? "💓 Aguardando Resposta" : "⏳ Marcar como Aguardando Resposta"}
+                  </button>
+                )}
+
                 {/* Actions */}
                 <div className="flex gap-2">
                   {contact.trelloUrl ? (
-                    <a
+                    
                       href={contact.trelloUrl}
                       target="_blank"
                       rel="noopener noreferrer"
