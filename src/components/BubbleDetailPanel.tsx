@@ -101,7 +101,7 @@ export function BubbleDetailPanel({
                 {/* Info rows */}
                 <div className="space-y-2 mb-5">
                   {contact.telefono && (
-                    
+                    <a
                       href={`tel:${contact.telefono}`}
                       className="flex items-center gap-2.5 text-sm text-foreground hover:text-primary transition-colors group"
                     >
@@ -172,7 +172,7 @@ export function BubbleDetailPanel({
                 {/* Actions */}
                 <div className="flex gap-2">
                   {contact.trelloUrl ? (
-                    
+                    <a
                       href={contact.trelloUrl}
                       target="_blank"
                       rel="noopener noreferrer"
