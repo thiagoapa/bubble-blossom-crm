@@ -20,7 +20,7 @@ const Index = () => {
   const {
     contacts, groups, metaSemanal, weeklyCount, weekProgress,
     todayCount, monthCount, heatmapDays, contactsByPhase,
-    addContact, changePhase, deleteContact, updateMeetingDate,
+    addContact, changePhase, deleteContact, updateMeetingDate, updateNote,
     addGroup, addContactToGroup, removeContactFromGroup, deleteGroup,
     toggleAguardando,
   } = useContacts();
@@ -28,13 +28,14 @@ const Index = () => {
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [newContactId, setNewContactId] = useState<string | null>(null);
 
-  const handleAddContact = useCallback((nombre: string, telefono?: string, createdAt?: string) => {
-    const c = addContact(nombre, telefono, createdAt);
-    Promise.resolve(c).then((contact) => {
-      setNewContactId(contact.id);
-      setTimeout(() => setNewContactId(null), 2000);
-    });
-  }, [addContact]);
+  const handleAddContact = useCallback(async (nombre: string, telefono?: string, createdAt?: string, notes?: string) => {
+    const contact = await addContact(nombre, telefono, createdAt);
+    setNewContactId(contact.id);
+    setTimeout(() => setNewContactId(null), 2000);
+    if (notes && contact.id) {
+      updateNote(contact.id, notes);
+    }
+  }, [addContact, updateNote]);
 
   const handleDrop = useCallback((fase: Phase, contactId: string) => {
     changePhase(contactId, fase);
@@ -181,6 +182,7 @@ const Index = () => {
         onDelete={deleteContact}
         onToggleAguardando={toggleAguardando}
         onUpdateMeetingDate={updateMeetingDate}
+        onUpdateNote={updateNote}
       />
     </div>
   );
