@@ -74,6 +74,7 @@ api.get("/contacts", requireAuth, async (req, res) => {
         ? r.second_meeting_date.toISOString().split("T")[0]
         : null,
       aguardandoResposta: r.aguardando_resposta ?? false,
+      notes: r.notes ?? null,
     }));
     res.json(rows);
   } catch (err) {
@@ -98,7 +99,7 @@ api.post("/contacts", requireAuth, async (req, res) => {
 
 api.patch("/contacts/:id", requireAuth, async (req, res) => {
   try {
-    const { etapa, firstMeetingDate, secondMeetingDate, aguardandoResposta } = req.body;
+    const { etapa, firstMeetingDate, secondMeetingDate, aguardandoResposta, notes } = req.body;
 
     const fields = [];
     const values = [];
@@ -108,6 +109,7 @@ api.patch("/contacts/:id", requireAuth, async (req, res) => {
     if (firstMeetingDate !== undefined)   { fields.push(`first_meeting_date=$${i++}`);  values.push(firstMeetingDate || null); }
     if (secondMeetingDate !== undefined)  { fields.push(`second_meeting_date=$${i++}`); values.push(secondMeetingDate || null); }
     if (aguardandoResposta !== undefined) { fields.push(`aguardando_resposta=$${i++}`); values.push(aguardandoResposta); }
+    if (notes !== undefined)              { fields.push(`notes=$${i++}`);               values.push(notes || null); }
 
     if (fields.length === 0) return res.json({ success: true });
 
