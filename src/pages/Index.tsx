@@ -20,7 +20,7 @@ const Index = () => {
   const {
     contacts, groups, metaSemanal, weeklyCount, weekProgress,
     todayCount, monthCount, heatmapDays, contactsByPhase,
-    addContact, changePhase, deleteContact,
+    addContact, changePhase, deleteContact, updateMeetingDate,
     addGroup, addContactToGroup, removeContactFromGroup, deleteGroup,
     toggleAguardando,
   } = useContacts();
@@ -180,6 +180,7 @@ const Index = () => {
         onPhaseChange={(id, fase) => { changePhase(id, fase); setSelectedContact(null); }}
         onDelete={deleteContact}
         onToggleAguardando={toggleAguardando}
+        onUpdateMeetingDate={updateMeetingDate}
       />
     </div>
   );
