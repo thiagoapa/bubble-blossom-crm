@@ -186,6 +186,19 @@ export function useContacts() {
     } catch (err) { console.error("Error updating phase:", err); }
   }, []);
 
+  const updateMeetingDate = useCallback(async (id: string, field: "firstMeetingDate" | "secondMeetingDate", date: string) => {
+    setContacts((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, [field]: date } : c))
+    );
+    try {
+      await fetch(`${API_BASE}/contacts/${id}`, {
+        method: "PATCH",
+        headers: authHeaders(),
+        body: JSON.stringify({ [field]: date }),
+      });
+    } catch (err) { console.error("Error updating meeting date:", err); }
+  }, []);
+
   const deleteContact = useCallback(async (id: string) => {
     setContacts((prev) => prev.filter((c) => c.id !== id));
     setGroups((prev) => prev.map((g) => ({ ...g, contactIds: g.contactIds.filter((cid) => cid !== id) })));
@@ -228,7 +241,7 @@ export function useContacts() {
   return {
     contacts: contactosNormalizados, groups, loading, metaSemanal, weeklyCount, weekProgress,
     todayCount, monthCount, heatmapDays, contactsByPhase, addContact, changePhase,
-    deleteContact, addGroup, addContactToGroup, removeContactFromGroup, deleteGroup,
+    deleteContact, updateMeetingDate, addGroup, addContactToGroup, removeContactFromGroup, deleteGroup,
     toggleAguardando,
   };
 }
