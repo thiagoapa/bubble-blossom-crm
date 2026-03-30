@@ -71,6 +71,9 @@ function MonthGrid({
   const today = new Date().toISOString().split("T")[0];
   const totalMonth = Object.values(dayData).reduce((s, d) => s + d.createdCount, 0);
 
+  // Full view cell size
+  const cellH = compact ? "h-7" : "h-16";
+
   return (
     <div className={`rounded-xl border border-border/60 bg-background/80 ${compact ? "p-2.5" : "p-4"}`}>
       <div className="flex items-center justify-between mb-2">
@@ -84,17 +87,17 @@ function MonthGrid({
         )}
       </div>
 
-      <div className={`grid grid-cols-7 gap-0.5 text-muted-foreground mb-1 ${compact ? "text-[9px]" : "text-[10px]"}`}>
-        {WEEKDAYS.map((d) => <span key={d} className="text-center">{d}</span>)}
+      <div className={`grid grid-cols-7 gap-1 text-muted-foreground mb-1.5 ${compact ? "text-[9px]" : "text-[11px]"}`}>
+        {WEEKDAYS.map((d) => <span key={d} className="text-center font-medium">{d}</span>)}
       </div>
 
-      <div className="grid grid-cols-7 gap-0.5">
+      <div className="grid grid-cols-7 gap-1">
         {weeks.map((week, wi) =>
           week.map((day, di) => {
-            if (!day) return <div key={`${wi}-${di}`} className={compact ? "h-6" : "h-9"} />;
+            if (!day) return <div key={`${wi}-${di}`} className={cellH} />;
+
             const hasAny = day.createdCount || day.firstCount || day.secondCount;
             const isToday = day.date === today;
-            const total = (day.createdCount || 0) + (day.firstCount || 0) + (day.secondCount || 0);
 
             return (
               <button
@@ -102,17 +105,52 @@ function MonthGrid({
                 type="button"
                 onClick={() => hasAny && onSelectDate(day.date)}
                 className={`
-                  relative flex flex-col items-center justify-center rounded transition-colors
-                  ${compact ? "h-6 text-[9px]" : "h-9 text-[10px]"}
-                  ${isToday ? "ring-1 ring-violet-400" : ""}
+                  relative flex flex-col items-start justify-start rounded-lg transition-colors px-1 py-1
+                  ${cellH}
+                  ${isToday ? "ring-2 ring-violet-400 ring-offset-1" : ""}
                   ${hasAny
-                    ? "bg-violet-50 text-violet-700 hover:bg-violet-100 dark:bg-violet-900/20 dark:text-violet-300 cursor-pointer"
-                    : "text-muted-foreground/60 cursor-default"
+                    ? "bg-violet-50 hover:bg-violet-100 dark:bg-violet-900/20 cursor-pointer border border-violet-200/60"
+                    : "text-muted-foreground/50 cursor-default border border-transparent"
                   }
                 `}
               >
-                <span className="font-medium">{day.dayNumber}</span>
-                {hasAny && <span className="text-[8px] leading-none font-bold">{total}</span>}
+                {/* Day number */}
+                <span className={`leading-none font-semibold ${compact ? "text-[9px]" : "text-xs"} ${hasAny ? "text-violet-700" : "text-muted-foreground/50"}`}>
+                  {day.dayNumber}
+                </span>
+
+                {/* Dots for full view */}
+                {!compact && (
+                  <div className="mt-auto flex flex-col gap-0.5 w-full">
+                    {day.createdCount > 0 && (
+                      <div className="flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-violet-400 shrink-0" />
+                        <span className="text-[9px] font-bold text-violet-600">{day.createdCount}</span>
+                      </div>
+                    )}
+                    {day.firstCount > 0 && (
+                      <div className="flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-sky-400 shrink-0" />
+                        <span className="text-[9px] font-bold text-sky-600">{day.firstCount}</span>
+                      </div>
+                    )}
+                    {day.secondCount > 0 && (
+                      <div className="flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-orange-400 shrink-0" />
+                        <span className="text-[9px] font-bold text-orange-600">{day.secondCount}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Compact: just colored dots */}
+                {compact && hasAny && (
+                  <div className="flex gap-0.5 mt-0.5 flex-wrap">
+                    {day.createdCount > 0 && <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />}
+                    {day.firstCount > 0 && <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />}
+                    {day.secondCount > 0 && <span className="w-1.5 h-1.5 rounded-full bg-orange-400" />}
+                  </div>
+                )}
               </button>
             );
           })
@@ -152,6 +190,14 @@ export function ActivityCalendar({ contacts, onDeleteContact, onChangePhase }: A
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {/* Legend */}
+          {!showYear && (
+            <div className="hidden sm:flex items-center gap-3 text-[10px] text-muted-foreground mr-2">
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-violet-400 inline-block" /> Novo</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-sky-400 inline-block" /> 1R</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-orange-400 inline-block" /> 2R</span>
+            </div>
+          )}
           {showYear && totalYear > 0 && (
             <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-300">
               {totalYear} em {currentYear}
