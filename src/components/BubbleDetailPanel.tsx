@@ -38,17 +38,7 @@ export function BubbleDetailPanel({
     .map((w) => w[0]?.toUpperCase())
     .join("");
 
-  const showMeetingDates =
-    contact.fase === "primeira" ||
-    contact.fase === "segunda" ||
-    contact.fase === "followup" ||
-    contact.fase === "captacao" ||
-    contact.fase === "comprador" ||
-    contact.fase === "enviei_imoveis" ||
-    contact.fase === "visita_imovel" ||
-    contact.fase === "comprou" ||
-    contact.firstMeetingDate ||
-    contact.secondMeetingDate;
+
 
   return (
     <AnimatePresence>
@@ -138,7 +128,7 @@ export function BubbleDetailPanel({
                 </div>
 
                 {/* Meeting dates */}
-                {showMeetingDates && onUpdateMeetingDate && (
+                {onUpdateMeetingDate && (
                   <>
                     <div className="h-px bg-border/60 mb-4" />
                     <div className="mb-4 space-y-2">
