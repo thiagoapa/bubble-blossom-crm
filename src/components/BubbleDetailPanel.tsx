@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Phone, Calendar, ExternalLink, Trash2, ArrowRight, Zap } from "lucide-react";
+import { X, Phone, Calendar, ExternalLink, Trash2, ArrowRight, Zap, FileText } from "lucide-react";
 import type { Contact, Phase } from "@/hooks/useContacts";
 import { PHASES, PHASE_MAP } from "@/lib/phases";
 
@@ -11,6 +11,7 @@ interface BubbleDetailPanelProps {
   onDelete: (id: string) => void;
   onToggleAguardando?: (id: string, value: boolean) => void;
   onUpdateMeetingDate?: (id: string, field: "firstMeetingDate" | "secondMeetingDate", date: string) => void;
+  onUpdateNote?: (id: string, notes: string) => void;
 }
 
 export function BubbleDetailPanel({
@@ -20,9 +21,12 @@ export function BubbleDetailPanel({
   onDelete,
   onToggleAguardando,
   onUpdateMeetingDate,
+  onUpdateNote,
 }: BubbleDetailPanelProps) {
   const [editingFirst, setEditingFirst] = useState(false);
   const [editingSecond, setEditingSecond] = useState(false);
+  const [editingNote, setEditingNote] = useState(false);
+  const [noteValue, setNoteValue] = useState("");
 
   if (!contact) return null;
   const config = PHASE_MAP[contact.fase];
@@ -198,6 +202,58 @@ export function BubbleDetailPanel({
                 )}
 
                 <div className="h-px bg-border/60 mb-4" />
+
+                {/* Notes / Anotações */}
+                {onUpdateNote && (
+                  <>
+                    <div className="mb-4">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2.5 flex items-center gap-1.5">
+                        <FileText className="w-3 h-3" /> Anotações
+                      </p>
+                      {editingNote ? (
+                        <div className="space-y-2">
+                          <textarea
+                            autoFocus
+                            value={noteValue}
+                            onChange={(e) => setNoteValue(e.target.value)}
+                            rows={4}
+                            placeholder="Escreva suas anotações sobre este contato..."
+                            className="w-full text-xs px-3 py-2 rounded-xl border border-border bg-background text-foreground resize-none focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground/50"
+                          />
+                          <div className="flex gap-1.5">
+                            <button
+                              onClick={() => {
+                                onUpdateNote(contact.id, noteValue);
+                                setEditingNote(false);
+                              }}
+                              className="flex-1 text-xs px-3 py-1.5 rounded-lg pill-gradient text-white font-bold shadow-sm hover:opacity-90 transition-opacity"
+                            >
+                              Salvar
+                            </button>
+                            <button
+                              onClick={() => { setNoteValue(contact.notes ?? ""); setEditingNote(false); }}
+                              className="text-xs px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:bg-accent transition-colors"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => { setNoteValue(contact.notes ?? ""); setEditingNote(true); }}
+                          className={`w-full text-left text-xs px-3 py-2.5 rounded-xl border transition-colors min-h-[60px] ${
+                            contact.notes
+                              ? "border-border text-foreground bg-muted/30 hover:bg-muted/50"
+                              : "border-dashed border-border/60 text-muted-foreground hover:border-primary/50 hover:text-primary"
+                          }`}
+                        >
+                          {contact.notes || "Clique para adicionar uma anotação..."}
+                        </button>
+                      )}
+                    </div>
+                    <div className="h-px bg-border/60 mb-4" />
+                  </>
+                )}
 
                 {/* Phase change */}
                 <div className="mb-4">
