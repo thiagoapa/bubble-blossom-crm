@@ -3,7 +3,7 @@ import { getToken } from "@/components/LoginScreen";
 
 const API_BASE = "https://crm.project28.cloud/api";
 
-export type Phase = "novos" | "primeira" | "segunda" | "followup" | 
+export type Phase = "novos" | "primeira" | "segunda" | "followup" |
   "captacao" | "comprador" | "enviei_imoveis" | "visita_imovel" | "comprou";
 
 export interface Contact {
@@ -51,16 +51,24 @@ function mapFromApi(c: {
   fecha?: string;
   createdAt?: string;
   fechaCreacion?: string;
+  // camelCase from server
   firstMeetingDate?: string;
   secondMeetingDate?: string;
-  trelloUrl?: string;
   aguardandoResposta?: boolean;
+  // snake_case fallback (direct DB)
+  first_meeting_date?: string;
+  second_meeting_date?: string;
+  aguardando_resposta?: boolean;
+  trelloUrl?: string;
 }): Contact {
   const dateStr =
     c.fecha ? c.fecha.split("T")[0]
     : c.createdAt ? c.createdAt.split("T")[0]
     : c.fechaCreacion ? c.fechaCreacion.split("T")[0]
     : new Date().toISOString().split("T")[0];
+
+  const firstMeeting = c.firstMeetingDate ?? c.first_meeting_date ?? undefined;
+  const secondMeeting = c.secondMeetingDate ?? c.second_meeting_date ?? undefined;
 
   return {
     id: String(c.id),
@@ -69,10 +77,10 @@ function mapFromApi(c: {
     fase: (c.etapa ?? c.fase ?? "novos") as Phase,
     fechaCreacion: dateStr,
     createdAt: dateStr,
-    firstMeetingDate: c.firstMeetingDate,
-    secondMeetingDate: c.secondMeetingDate,
+    firstMeetingDate: firstMeeting ? firstMeeting.split("T")[0] : undefined,
+    secondMeetingDate: secondMeeting ? secondMeeting.split("T")[0] : undefined,
     trelloUrl: c.trelloUrl,
-    aguardandoResposta: c.aguardandoResposta ?? false,
+    aguardandoResposta: c.aguardandoResposta ?? c.aguardando_resposta ?? false,
   };
 }
 
@@ -144,16 +152,37 @@ export function useContacts() {
 
   const changePhase = useCallback(async (id: string, newFase: Phase, phaseDate?: string) => {
     const todayStr = new Date().toISOString().split("T")[0];
+    const effectiveDate = phaseDate || todayStr;
+
+    // Update local state first
+    let firstMeetingToSave: string | undefined;
+    let secondMeetingToSave: string | undefined;
+
     setContacts((prev) => prev.map((c) => {
       if (c.id !== id) return c;
       const next: Contact = { ...c, fase: newFase };
-      const effectiveDate = phaseDate || todayStr;
-      if (newFase === "primeira" && !next.firstMeetingDate) next.firstMeetingDate = effectiveDate;
-      if (newFase === "segunda" && !next.secondMeetingDate) next.secondMeetingDate = effectiveDate;
+      if (newFase === "primeira" && !next.firstMeetingDate) {
+        next.firstMeetingDate = effectiveDate;
+        firstMeetingToSave = effectiveDate;
+      }
+      if (newFase === "segunda" && !next.secondMeetingDate) {
+        next.secondMeetingDate = effectiveDate;
+        secondMeetingToSave = effectiveDate;
+      }
       return next;
     }));
+
+    // Build PATCH payload — always send etapa, plus dates if they were just set
+    const payload: Record<string, unknown> = { etapa: newFase };
+    if (firstMeetingToSave)  payload.firstMeetingDate  = firstMeetingToSave;
+    if (secondMeetingToSave) payload.secondMeetingDate = secondMeetingToSave;
+
     try {
-      await fetch(`${API_BASE}/contacts/${id}`, { method: "PATCH", headers: authHeaders(), body: JSON.stringify({ etapa: newFase }) });
+      await fetch(`${API_BASE}/contacts/${id}`, {
+        method: "PATCH",
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+      });
     } catch (err) { console.error("Error updating phase:", err); }
   }, []);
 
