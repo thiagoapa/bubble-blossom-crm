@@ -20,7 +20,7 @@ const Index = () => {
   const {
     contacts, groups, metaSemanal, weeklyCount, weekProgress,
     todayCount, monthCount, heatmapDays, contactsByPhase,
-    addContact, changePhase, deleteContact, updateMeetingDate, updateNote,
+    addContact, changePhase, deleteContact, updateMeetingDate, updateNote, updateImovel,
     addGroup, addContactToGroup, removeContactFromGroup, deleteGroup,
     toggleAguardando,
   } = useContacts();
@@ -183,6 +183,7 @@ const Index = () => {
         onToggleAguardando={toggleAguardando}
         onUpdateMeetingDate={updateMeetingDate}
         onUpdateNote={updateNote}
+        onUpdateImovel={updateImovel}
       />
     </div>
   );
