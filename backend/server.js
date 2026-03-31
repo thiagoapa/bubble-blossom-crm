@@ -99,7 +99,11 @@ api.post("/contacts", requireAuth, async (req, res) => {
 
 api.patch("/contacts/:id", requireAuth, async (req, res) => {
   try {
-    const { etapa, firstMeetingDate, secondMeetingDate, aguardandoResposta, notes } = req.body;
+    const { etapa, firstMeetingDate, secondMeetingDate, aguardandoResposta, notes,
+      imovel_tipo, imovel_bairro, imovel_endereco, imovel_lat, imovel_lng,
+      imovel_metragem, imovel_quartos, imovel_banheiros, imovel_garagem,
+      imovel_mobiliado, imovel_elevador, imovel_seguranca, imovel_area_lazer, imovel_preco
+    } = req.body;
 
     const fields = [];
     const values = [];
@@ -110,6 +114,20 @@ api.patch("/contacts/:id", requireAuth, async (req, res) => {
     if (secondMeetingDate !== undefined)  { fields.push(`second_meeting_date=$${i++}`); values.push(secondMeetingDate || null); }
     if (aguardandoResposta !== undefined) { fields.push(`aguardando_resposta=$${i++}`); values.push(aguardandoResposta); }
     if (notes !== undefined)              { fields.push(`notes=$${i++}`);               values.push(notes || null); }
+    if (imovel_tipo !== undefined)        { fields.push(`imovel_tipo=$${i++}`);         values.push(imovel_tipo || null); }
+    if (imovel_bairro !== undefined)      { fields.push(`imovel_bairro=$${i++}`);       values.push(imovel_bairro || null); }
+    if (imovel_endereco !== undefined)    { fields.push(`imovel_endereco=$${i++}`);     values.push(imovel_endereco || null); }
+    if (imovel_lat !== undefined)         { fields.push(`imovel_lat=$${i++}`);          values.push(imovel_lat ?? null); }
+    if (imovel_lng !== undefined)         { fields.push(`imovel_lng=$${i++}`);          values.push(imovel_lng ?? null); }
+    if (imovel_metragem !== undefined)    { fields.push(`imovel_metragem=$${i++}`);     values.push(imovel_metragem ?? null); }
+    if (imovel_quartos !== undefined)     { fields.push(`imovel_quartos=$${i++}`);      values.push(imovel_quartos ?? null); }
+    if (imovel_banheiros !== undefined)   { fields.push(`imovel_banheiros=$${i++}`);    values.push(imovel_banheiros ?? null); }
+    if (imovel_garagem !== undefined)     { fields.push(`imovel_garagem=$${i++}`);      values.push(imovel_garagem ?? null); }
+    if (imovel_mobiliado !== undefined)   { fields.push(`imovel_mobiliado=$${i++}`);    values.push(imovel_mobiliado ?? false); }
+    if (imovel_elevador !== undefined)    { fields.push(`imovel_elevador=$${i++}`);     values.push(imovel_elevador ?? false); }
+    if (imovel_seguranca !== undefined)   { fields.push(`imovel_seguranca=$${i++}`);    values.push(imovel_seguranca ?? false); }
+    if (imovel_area_lazer !== undefined)  { fields.push(`imovel_area_lazer=$${i++}`);   values.push(imovel_area_lazer ?? "nao"); }
+    if (imovel_preco !== undefined)       { fields.push(`imovel_preco=$${i++}`);        values.push(imovel_preco ?? null); }
 
     if (fields.length === 0) return res.json({ success: true });
 
