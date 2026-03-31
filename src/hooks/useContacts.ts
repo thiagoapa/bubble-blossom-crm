@@ -6,6 +6,21 @@ const API_BASE = "https://crm.project28.cloud/api";
 export type Phase = "novos" | "primeira" | "segunda" | "followup" |
   "captacao" | "comprador" | "enviei_imoveis" | "visita_imovel" | "comprou";
 
+export interface Imovel {
+  tipo?: string;
+  bairro?: string;
+  endereco?: string;
+  metragem?: number;
+  quartos?: number;
+  banheiros?: number;
+  garagem?: number;
+  mobiliado?: boolean;
+  elevador?: boolean;
+  seguranca?: boolean;
+  area_lazer?: string;
+  preco?: number;
+}
+
 export interface Contact {
   id: string;
   nombre: string;
@@ -18,6 +33,20 @@ export interface Contact {
   trelloUrl?: string;
   aguardandoResposta?: boolean;
   notes?: string;
+  imovel_tipo?: string;
+  imovel_bairro?: string;
+  imovel_endereco?: string;
+  imovel_lat?: number;
+  imovel_lng?: number;
+  imovel_metragem?: number;
+  imovel_quartos?: number;
+  imovel_banheiros?: number;
+  imovel_garagem?: number;
+  imovel_mobiliado?: boolean;
+  imovel_elevador?: boolean;
+  imovel_seguranca?: boolean;
+  imovel_area_lazer?: string;
+  imovel_preco?: number;
 }
 
 export interface ManualGroup {
@@ -52,16 +81,28 @@ function mapFromApi(c: {
   fecha?: string;
   createdAt?: string;
   fechaCreacion?: string;
-  // camelCase from server
   firstMeetingDate?: string;
   secondMeetingDate?: string;
   aguardandoResposta?: boolean;
-  // snake_case fallback (direct DB)
   first_meeting_date?: string;
   second_meeting_date?: string;
   aguardando_resposta?: boolean;
   trelloUrl?: string;
   notes?: string;
+  imovel_tipo?: string;
+  imovel_bairro?: string;
+  imovel_endereco?: string;
+  imovel_lat?: number;
+  imovel_lng?: number;
+  imovel_metragem?: number | string;
+  imovel_quartos?: number;
+  imovel_banheiros?: number;
+  imovel_garagem?: number;
+  imovel_mobiliado?: boolean;
+  imovel_elevador?: boolean;
+  imovel_seguranca?: boolean;
+  imovel_area_lazer?: string;
+  imovel_preco?: number | string;
 }): Contact {
   const dateStr =
     c.fecha ? c.fecha.split("T")[0]
@@ -84,6 +125,20 @@ function mapFromApi(c: {
     trelloUrl: c.trelloUrl,
     aguardandoResposta: c.aguardandoResposta ?? c.aguardando_resposta ?? false,
     notes: c.notes ?? undefined,
+    imovel_tipo: c.imovel_tipo ?? undefined,
+    imovel_bairro: c.imovel_bairro ?? undefined,
+    imovel_endereco: c.imovel_endereco ?? undefined,
+    imovel_lat: c.imovel_lat ?? undefined,
+    imovel_lng: c.imovel_lng ?? undefined,
+    imovel_metragem: c.imovel_metragem ? Number(c.imovel_metragem) : undefined,
+    imovel_quartos: c.imovel_quartos ?? undefined,
+    imovel_banheiros: c.imovel_banheiros ?? undefined,
+    imovel_garagem: c.imovel_garagem ?? undefined,
+    imovel_mobiliado: c.imovel_mobiliado ?? false,
+    imovel_elevador: c.imovel_elevador ?? false,
+    imovel_seguranca: c.imovel_seguranca ?? false,
+    imovel_area_lazer: c.imovel_area_lazer ?? "nao",
+    imovel_preco: c.imovel_preco ? Number(c.imovel_preco) : undefined,
   };
 }
 
@@ -236,6 +291,46 @@ export function useContacts() {
     } catch (err) { console.error("Error updating note:", err); }
   }, []);
 
+  const updateImovel = useCallback(async (id: string, imovel: Imovel) => {
+    setContacts((prev) =>
+      prev.map((c) => c.id === id ? {
+        ...c,
+        imovel_tipo: imovel.tipo,
+        imovel_bairro: imovel.bairro,
+        imovel_endereco: imovel.endereco,
+        imovel_metragem: imovel.metragem,
+        imovel_quartos: imovel.quartos,
+        imovel_banheiros: imovel.banheiros,
+        imovel_garagem: imovel.garagem,
+        imovel_mobiliado: imovel.mobiliado,
+        imovel_elevador: imovel.elevador,
+        imovel_seguranca: imovel.seguranca,
+        imovel_area_lazer: imovel.area_lazer,
+        imovel_preco: imovel.preco,
+      } : c)
+    );
+    try {
+      await fetch(`${API_BASE}/contacts/${id}`, {
+        method: "PATCH",
+        headers: authHeaders(),
+        body: JSON.stringify({
+          imovel_tipo: imovel.tipo || null,
+          imovel_bairro: imovel.bairro || null,
+          imovel_endereco: imovel.endereco || null,
+          imovel_metragem: imovel.metragem ?? null,
+          imovel_quartos: imovel.quartos ?? null,
+          imovel_banheiros: imovel.banheiros ?? null,
+          imovel_garagem: imovel.garagem ?? null,
+          imovel_mobiliado: imovel.mobiliado ?? false,
+          imovel_elevador: imovel.elevador ?? false,
+          imovel_seguranca: imovel.seguranca ?? false,
+          imovel_area_lazer: imovel.area_lazer ?? "nao",
+          imovel_preco: imovel.preco ?? null,
+        }),
+      });
+    } catch (err) { console.error("Error updating imovel:", err); }
+  }, []);
+
   const addGroup = useCallback((nombre: string) => {
     setGroups((prev) => [...prev, { id: crypto.randomUUID(), nombre, contactIds: [] }]);
   }, []);
@@ -257,7 +352,7 @@ export function useContacts() {
   return {
     contacts: contactosNormalizados, groups, loading, metaSemanal, weeklyCount, weekProgress,
     todayCount, monthCount, heatmapDays, contactsByPhase, addContact, changePhase,
-    deleteContact, updateMeetingDate, updateNote, addGroup, addContactToGroup, removeContactFromGroup, deleteGroup,
+    deleteContact, updateMeetingDate, updateNote, updateImovel, addGroup, addContactToGroup, removeContactFromGroup, deleteGroup,
     toggleAguardando,
   };
 }
