@@ -51,12 +51,22 @@ export function BubbleDetailPanel({
   const [imovelOpen, setImovelOpen] = useState(false);
   const [imovelEditing, setImovelEditing] = useState(false);
   const [imovel, setImovel] = useState<Imovel>({});
+  const [precoDisplay, setPrecoDisplay] = useState(
+    contact?.imovel_preco
+      ? Number(contact.imovel_preco).toLocaleString("pt-BR", { minimumFractionDigits: 2 })
+      : ""
+  );
 
   useEffect(() => {
     setNoteValue(contact?.notes ?? "");
     setEditingNote(false);
     setImovelEditing(false);
     setImovelOpen(false);
+    setPrecoDisplay(
+      contact?.imovel_preco
+        ? Number(contact.imovel_preco).toLocaleString("pt-BR", { minimumFractionDigits: 2 })
+        : ""
+    );
     setImovel({
       tipo: contact?.imovel_tipo ?? "",
       bairro: contact?.imovel_bairro ?? "",
@@ -81,12 +91,6 @@ export function BubbleDetailPanel({
   const initials = contact.nombre.split(" ").slice(0, 2).map((w) => w[0]?.toUpperCase()).join("");
 
   const hasImovel = contact.imovel_tipo || contact.imovel_bairro || contact.imovel_preco;
-
-  const [precoDisplay, setPrecoDisplay] = useState(
-    contact.imovel_preco
-      ? Number(contact.imovel_preco).toLocaleString("pt-BR", { minimumFractionDigits: 2 })
-      : ""
-  );
 
   const handleSaveImovel = () => {
     if (onUpdateImovel) {
