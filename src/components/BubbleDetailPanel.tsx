@@ -10,6 +10,7 @@ interface BubbleDetailPanelProps {
   onPhaseChange: (id: string, fase: Phase) => void;
   onDelete: (id: string) => void;
   onToggleAguardando?: (id: string, value: boolean) => void;
+  onUpdateSubStatus?: (id: string, subStatus: string | null) => void;
   onUpdateMeetingDate?: (id: string, field: "firstMeetingDate" | "secondMeetingDate", date: string) => void;
   onUpdateNote?: (id: string, notes: string) => void;
   onUpdateImovel?: (id: string, imovel: Imovel) => void;
@@ -40,6 +41,7 @@ export function BubbleDetailPanel({
   onPhaseChange,
   onDelete,
   onToggleAguardando,
+  onUpdateSubStatus,
   onUpdateMeetingDate,
   onUpdateNote,
   onUpdateImovel,
@@ -510,6 +512,34 @@ export function BubbleDetailPanel({
                     className={`w-full mb-3 text-xs px-3 py-2 rounded-xl border font-semibold transition-colors ${contact.aguardandoResposta ? "bg-rose-100 text-rose-600 border-rose-200 dark:bg-rose-900/30 dark:border-rose-800" : "border-border text-muted-foreground hover:border-rose-300 hover:text-rose-500"}`}>
                     {contact.aguardandoResposta ? "💓 Aguardando Resposta" : "⏳ Marcar como Aguardando Resposta"}
                   </button>
+                )}
+
+                {onUpdateSubStatus && (
+                  <div className="mb-3">
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                      <span>⚡</span> Status pendente
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {[
+                        { key: "aguardando_documentacao", label: "📄 Aguardando Doc." },
+                        { key: "aguardando_visita",       label: "🏠 Aguardando Visita" },
+                        { key: "aguardando_proposta",     label: "📝 Aguardando Proposta" },
+                        { key: "aguardando_retorno",      label: "📞 Aguardando Retorno" },
+                      ].map((opt) => (
+                        <button
+                          key={opt.key}
+                          onClick={() => onUpdateSubStatus(contact.id, contact.subStatus === opt.key ? null : opt.key)}
+                          className={`text-[11px] px-2.5 py-1.5 rounded-full font-bold border transition-all ${
+                            contact.subStatus === opt.key
+                              ? "bg-amber-400 text-white border-transparent shadow-sm scale-105"
+                              : "bg-muted text-muted-foreground border-border hover:border-amber-300 hover:text-amber-600"
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 )}
 
                 {/* Actions */}
