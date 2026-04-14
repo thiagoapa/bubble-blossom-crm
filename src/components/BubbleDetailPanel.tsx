@@ -525,6 +525,7 @@ export function BubbleDetailPanel({
                         { key: "aguardando_visita",       label: "🏠 Aguardando Visita" },
                         { key: "aguardando_proposta",     label: "📝 Aguardando Proposta" },
                         { key: "aguardando_retorno",      label: "📞 Aguardando Retorno" },
+                        { key: "aguardando_fechar_captacao", label: "🤝 Aguardando Fechar Captação" },
                       ].map((opt) => (
                         <button
                           key={opt.key}
