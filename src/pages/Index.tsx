@@ -22,7 +22,7 @@ const Index = () => {
     todayCount, monthCount, heatmapDays, contactsByPhase,
     addContact, changePhase, deleteContact, updateMeetingDate, updateNote, updateImovel,
     addGroup, addContactToGroup, removeContactFromGroup, deleteGroup,
-    toggleAguardando,
+    toggleAguardando, updateSubStatus,
   } = useContacts();
 
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
@@ -181,6 +181,7 @@ const Index = () => {
         onPhaseChange={(id, fase) => { changePhase(id, fase); setSelectedContact(null); }}
         onDelete={deleteContact}
         onToggleAguardando={toggleAguardando}
+        onUpdateSubStatus={updateSubStatus}
         onUpdateMeetingDate={updateMeetingDate}
         onUpdateNote={updateNote}
         onUpdateImovel={updateImovel}
