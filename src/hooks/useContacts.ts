@@ -192,23 +192,23 @@ export function useContacts() {
 
   const addContact = useCallback(async (nombre: string, telefono?: string, createdDate?: string) => {
     const baseDate = createdDate || new Date().toISOString().split("T")[0];
-    try {
-      const res = await fetch(`${API_BASE}/contacts`, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify({ nombre: nombre.trim(), telefono: telefono?.trim() || null, etapa: "novos", fecha: baseDate }),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const saved = await res.json();
-      const newContact = mapFromApi(saved);
-      setContacts((prev) => [...prev, newContact]);
-      return newContact;
-    } catch (err) {
-      console.error("Error saving contact:", err);
-      const fallback: Contact = { id: crypto.randomUUID(), nombre: nombre.trim(), telefono: telefono?.trim() || undefined, fase: "novos", fechaCreacion: baseDate, createdAt: baseDate };
-      setContacts((prev) => [...prev, fallback]);
-      return fallback;
+    const res = await fetch(`${API_BASE}/contacts`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ nombre: nombre.trim(), telefono: telefono?.trim() || null, etapa: "novos", fecha: baseDate }),
+    });
+
+    // ✅ Si el backend detecta duplicado, lanzar error con el mensaje
+    if (res.status === 409) {
+      const body = await res.json();
+      throw new Error(`duplicate:${body.message}`);
     }
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const saved = await res.json();
+    const newContact = mapFromApi(saved);
+    setContacts((prev) => [...prev, newContact]);
+    return newContact;
   }, []);
 
   const changePhase = useCallback(async (id: string, newFase: Phase, phaseDate?: string) => {
