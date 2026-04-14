@@ -32,6 +32,7 @@ export interface Contact {
   secondMeetingDate?: string;
   trelloUrl?: string;
   aguardandoResposta?: boolean;
+  subStatus?: string;
   notes?: string;
   imovel_tipo?: string;
   imovel_bairro?: string;
@@ -87,6 +88,7 @@ function mapFromApi(c: {
   first_meeting_date?: string;
   second_meeting_date?: string;
   aguardando_resposta?: boolean;
+  sub_status?: string;
   trelloUrl?: string;
   notes?: string;
   imovel_tipo?: string;
@@ -124,6 +126,7 @@ function mapFromApi(c: {
     secondMeetingDate: secondMeeting ? secondMeeting.split("T")[0] : undefined,
     trelloUrl: c.trelloUrl,
     aguardandoResposta: c.aguardandoResposta ?? c.aguardando_resposta ?? false,
+    subStatus: c.sub_status ?? undefined,
     notes: c.notes ?? undefined,
     imovel_tipo: c.imovel_tipo ?? undefined,
     imovel_bairro: c.imovel_bairro ?? undefined,
@@ -331,6 +334,19 @@ export function useContacts() {
     } catch (err) { console.error("Error updating imovel:", err); }
   }, []);
 
+  const updateSubStatus = useCallback(async (id: string, subStatus: string | null) => {
+    setContacts((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, subStatus: subStatus ?? undefined } : c))
+    );
+    try {
+      await fetch(`${API_BASE}/contacts/${id}`, {
+        method: "PATCH",
+        headers: authHeaders(),
+        body: JSON.stringify({ sub_status: subStatus }),
+      });
+    } catch (err) { console.error("Error updating sub_status:", err); }
+  }, []);
+
   const addGroup = useCallback((nombre: string) => {
     setGroups((prev) => [...prev, { id: crypto.randomUUID(), nombre, contactIds: [] }]);
   }, []);
@@ -353,6 +369,6 @@ export function useContacts() {
     contacts: contactosNormalizados, groups, loading, metaSemanal, weeklyCount, weekProgress,
     todayCount, monthCount, heatmapDays, contactsByPhase, addContact, changePhase,
     deleteContact, updateMeetingDate, updateNote, updateImovel, addGroup, addContactToGroup, removeContactFromGroup, deleteGroup,
-    toggleAguardando,
+    toggleAguardando, updateSubStatus,
   };
 }
