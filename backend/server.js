@@ -88,6 +88,23 @@ api.get("/contacts", requireAuth, async (req, res) => {
 api.post("/contacts", requireAuth, async (req, res) => {
   try {
     const { nombre, telefono, etapa, fecha } = req.body;
+
+    // ✅ Verificar duplicado por nombre o teléfono
+    const dup = await pool.query(
+      `SELECT id, nombre FROM contacts
+       WHERE LOWER(TRIM(nombre)) = LOWER(TRIM($1))
+          OR (telefono IS NOT NULL AND telefono = $2)
+       LIMIT 1`,
+      [nombre, telefono || null]
+    );
+
+    if (dup.rows.length > 0) {
+      return res.status(409).json({
+        error: "duplicate",
+        message: `"${dup.rows[0].nombre}" ya está registrado.`,
+      });
+    }
+
     const result = await pool.query(
       "INSERT INTO contacts (nombre, telefono, etapa, fecha) VALUES ($1,$2,$3,$4) RETURNING *",
       [nombre, telefono || null, etapa || "novos", fecha || null]
