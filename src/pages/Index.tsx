@@ -13,6 +13,7 @@ import { ActivityCalendar } from "@/components/dashboard/ActivityCalendar";
 import { AguardandoResposta } from "@/components/dashboard/AguardandoResposta";
 import { PipelineFunnel } from "@/components/PipelineFunnel";
 import { LoginScreen, useAuth } from "@/components/LoginScreen";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const { authed, login, logout } = useAuth();
@@ -25,17 +26,30 @@ const Index = () => {
     toggleAguardando, updateSubStatus,
   } = useContacts();
 
+  const { toast } = useToast();
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [newContactId, setNewContactId] = useState<string | null>(null);
 
   const handleAddContact = useCallback(async (nombre: string, telefono?: string, createdAt?: string, notes?: string) => {
-    const contact = await addContact(nombre, telefono, createdAt);
-    setNewContactId(contact.id);
-    setTimeout(() => setNewContactId(null), 2000);
-    if (notes && contact.id) {
-      updateNote(contact.id, notes);
+    try {
+      const contact = await addContact(nombre, telefono, createdAt);
+      setNewContactId(contact.id);
+      setTimeout(() => setNewContactId(null), 2000);
+      if (notes && contact.id) {
+        updateNote(contact.id, notes);
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "";
+      if (msg.startsWith("duplicate:")) {
+        const detail = msg.replace("duplicate:", "");
+        toast({
+          title: "😟 Contacto duplicado",
+          description: detail,
+          variant: "destructive",
+        });
+      }
     }
-  }, [addContact, updateNote]);
+  }, [addContact, updateNote, toast]);
 
   const handleDrop = useCallback((fase: Phase, contactId: string) => {
     changePhase(contactId, fase);
