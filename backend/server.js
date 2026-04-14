@@ -39,6 +39,10 @@ function requireAuth(req, res, next) {
 const api = express.Router();
 app.use("/api", api);
 
+// Ensure sub_status column exists (safe to run on every boot)
+pool.query(`ALTER TABLE contacts ADD COLUMN IF NOT EXISTS sub_status TEXT`)
+  .catch((err) => console.error("Migration sub_status:", err));
+
 // ─── AUTH ─────────────────────────────────────────────────────────────────────
 api.post("/auth/login", async (req, res) => {
   try {
@@ -77,6 +81,7 @@ api.get("/contacts", requireAuth, async (req, res) => {
         : null,
       aguardandoResposta: r.aguardando_resposta ?? false,
       notes: r.notes ?? null,
+      sub_status: r.sub_status ?? null,
     }));
     res.json(rows);
   } catch (err) {
@@ -118,7 +123,7 @@ api.post("/contacts", requireAuth, async (req, res) => {
 
 api.patch("/contacts/:id", requireAuth, async (req, res) => {
   try {
-    const { etapa, firstMeetingDate, secondMeetingDate, aguardandoResposta, notes,
+    const { etapa, firstMeetingDate, secondMeetingDate, aguardandoResposta, notes, sub_status,
       imovel_tipo, imovel_bairro, imovel_endereco, imovel_lat, imovel_lng,
       imovel_metragem, imovel_quartos, imovel_banheiros, imovel_garagem,
       imovel_mobiliado, imovel_elevador, imovel_seguranca, imovel_area_lazer, imovel_preco
@@ -133,6 +138,7 @@ api.patch("/contacts/:id", requireAuth, async (req, res) => {
     if (secondMeetingDate !== undefined)  { fields.push(`second_meeting_date=$${i++}`); values.push(secondMeetingDate || null); }
     if (aguardandoResposta !== undefined) { fields.push(`aguardando_resposta=$${i++}`); values.push(aguardandoResposta); }
     if (notes !== undefined)              { fields.push(`notes=$${i++}`);               values.push(notes || null); }
+    if (sub_status !== undefined)         { fields.push(`sub_status=$${i++}`);          values.push(sub_status || null); }
     if (imovel_tipo !== undefined)        { fields.push(`imovel_tipo=$${i++}`);         values.push(imovel_tipo || null); }
     if (imovel_bairro !== undefined)      { fields.push(`imovel_bairro=$${i++}`);       values.push(imovel_bairro || null); }
     if (imovel_endereco !== undefined)    { fields.push(`imovel_endereco=$${i++}`);     values.push(imovel_endereco || null); }
