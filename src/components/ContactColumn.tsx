@@ -110,6 +110,7 @@ export function ContactColumn({
                   key={c.id}
                   id={c.id}
                   nombre={c.nombre}
+                  telefono={c.telefono}
                   fase={c.fase}
                   isNew={c.id === newContactId}
                   onClick={() => onBubbleClick(c)}
