@@ -13,6 +13,7 @@ import { ActivityCalendar } from "@/components/dashboard/ActivityCalendar";
 import { AguardandoResposta } from "@/components/dashboard/AguardandoResposta";
 import { PipelineFunnel } from "@/components/PipelineFunnel";
 import { LoginScreen, useAuth } from "@/components/LoginScreen";
+import { SearchBar } from "@/components/SearchBar";
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
@@ -29,6 +30,7 @@ const Index = () => {
   const { toast } = useToast();
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [newContactId, setNewContactId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleAddContact = useCallback(async (nombre: string, telefono?: string, createdAt?: string, notes?: string) => {
     try {
@@ -54,6 +56,13 @@ const Index = () => {
   const handleDrop = useCallback((fase: Phase, contactId: string) => {
     changePhase(contactId, fase);
   }, [changePhase]);
+
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const filteredContactsByPhase = (fase: Phase) => {
+    const all = contactsByPhase(fase);
+    if (!normalizedQuery) return all;
+    return all.filter((c) => c.nombre.toLowerCase().includes(normalizedQuery));
+  };
 
   if (!authed) {
     return <LoginScreen onLogin={login} />;
@@ -112,8 +121,11 @@ const Index = () => {
                 <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Pipeline en vivo</p>
                 <p className="text-xs text-muted-foreground">Crea un contacto y arrástralo entre columnas para reflejar el estado real de tus conversaciones.</p>
               </div>
-              <div className="w-full md:max-w-md">
-                <ContactInput onAdd={handleAddContact} />
+              <div className="flex items-center gap-2 w-full md:max-w-md">
+                <div className="flex-1">
+                  <ContactInput onAdd={handleAddContact} />
+                </div>
+                <SearchBar value={searchQuery} onChange={setSearchQuery} />
               </div>
             </div>
             <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-thin">
@@ -121,7 +133,7 @@ const Index = () => {
                 <ContactColumn
                   key={phase.key}
                   config={phase}
-                  contacts={contactsByPhase(phase.key)}
+                  contacts={filteredContactsByPhase(phase.key)}
                   onBubbleClick={setSelectedContact}
                   onDrop={handleDrop}
                   newContactId={newContactId}
