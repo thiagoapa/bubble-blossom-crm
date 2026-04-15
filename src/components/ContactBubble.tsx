@@ -6,6 +6,7 @@ import { PHASE_MAP } from "@/lib/phases";
 interface ContactBubbleProps {
   id: string;
   nombre: string;
+  telefono?: string;
   fase: Phase;
   onClick: () => void;
   onDragStart?: (e: React.DragEvent<HTMLButtonElement>) => void;
@@ -15,12 +16,14 @@ interface ContactBubbleProps {
 export function ContactBubble({
   id,
   nombre,
+  telefono,
   fase,
   onClick,
   onDragStart,
   isNew = false,
 }: ContactBubbleProps) {
   const config = PHASE_MAP[fase];
+  const noPhone = !telefono;
   const initials = nombre
     .split(" ")
     .slice(0, 2)
@@ -49,7 +52,7 @@ export function ContactBubble({
               onDragStart={onDragStart}
               className={`
                 w-11 h-11 rounded-full flex items-center justify-center
-                ${config.colorClass} ${config.textClass}
+                ${noPhone ? "bg-emerald-500 text-white" : `${config.colorClass} ${config.textClass}`}
                 text-[11px] font-black cursor-grab active:cursor-grabbing
                 select-none outline-none
                 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary
@@ -57,9 +60,11 @@ export function ContactBubble({
                 hover:scale-115 hover:-translate-y-1.5
               `}
               style={{
-                boxShadow: `0 4px 14px ${config.headerColor}55, 0 1px 4px ${config.headerColor}33, inset 0 1px 0 rgba(255,255,255,0.25)`,
+                boxShadow: noPhone
+                  ? "0 4px 14px #10b98155, 0 1px 4px #10b98133, inset 0 1px 0 rgba(255,255,255,0.25)"
+                  : `0 4px 14px ${config.headerColor}55, 0 1px 4px ${config.headerColor}33, inset 0 1px 0 rgba(255,255,255,0.25)`,
               }}
-              aria-label={nombre}
+              aria-label={noPhone ? `${nombre} (sem telefone)` : nombre}
             >
               {initials || "?"}
             </button>
@@ -69,6 +74,11 @@ export function ContactBubble({
             className="text-xs font-semibold px-2.5 py-1 rounded-lg shadow-md"
           >
             {nombre}
+            {noPhone && (
+              <span className="block text-[10px] font-normal text-emerald-300 mt-0.5">
+                📵 Sem telefone
+              </span>
+            )}
           </TooltipContent>
         </Tooltip>
       </motion.div>
