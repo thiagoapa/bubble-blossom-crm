@@ -136,7 +136,7 @@ const Index = () => {
                       {PIPELINE_PHASES.reduce((acc, p) => acc + filteredContactsByPhase(p.key).length, 0)} resultado{PIPELINE_PHASES.reduce((acc, p) => acc + filteredContactsByPhase(p.key).length, 0) !== 1 ? "s" : ""}
                     </span>
                   )}
-                  <SearchBar value={searchQuery} onChange={setSearchQuery} />
+                  <SearchBar value={searchQuery} onChange={setSearchQuery} contacts={contacts} onSelectContact={setSelectedContact} />
                 </div>
               </div>
             </div>
