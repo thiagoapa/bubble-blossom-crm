@@ -21,14 +21,20 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
     setOpen(false);
   };
 
-  // Fechar com Escape
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") handleClear();
+      // Atalho: Ctrl+K ou Cmd+K abre a busca
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        if (!open) handleOpen();
+        else handleClear();
+      }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   return (
     <div className="flex items-center gap-1">
@@ -37,19 +43,22 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
           <motion.div
             key="input"
             initial={{ width: 0, opacity: 0 }}
-            animate={{ width: 180, opacity: 1 }}
+            animate={{ width: 200, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             transition={{ type: "spring", stiffness: 380, damping: 30 }}
             className="overflow-hidden"
           >
-            <input
-              ref={inputRef}
-              type="text"
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              placeholder="Buscar contato..."
-              className="w-full bg-muted/60 border border-border rounded-xl px-3 py-1.5 text-xs font-medium text-foreground placeholder:text-muted-foreground/60 outline-none focus:ring-1 focus:ring-primary/50 transition-all"
-            />
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/60 pointer-events-none" />
+              <input
+                ref={inputRef}
+                type="text"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder="Nome ou telefone…"
+                className="w-full bg-muted/60 border border-border rounded-xl pl-8 pr-3 py-1.5 text-xs font-medium text-foreground placeholder:text-muted-foreground/60 outline-none focus:ring-1 focus:ring-primary/50 transition-all"
+              />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -61,7 +70,7 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
           animate={{ scale: 1 }}
           exit={{ scale: 0 }}
           onClick={handleClear}
-          title="Limpar busca"
+          title="Limpar busca (Esc)"
           className="flex items-center justify-center w-7 h-7 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
         >
           <X size={14} />
@@ -69,8 +78,12 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
       ) : (
         <button
           onClick={open ? handleClear : handleOpen}
-          title={open ? "Fechar busca" : "Buscar contato"}
-          className="flex items-center justify-center w-7 h-7 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          title={open ? "Fechar busca (Esc)" : "Buscar contato (Ctrl+K)"}
+          className={`flex items-center justify-center w-7 h-7 rounded-xl transition-colors ${
+            open
+              ? "text-muted-foreground hover:text-foreground hover:bg-muted"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted"
+          }`}
         >
           <Search size={15} />
         </button>
