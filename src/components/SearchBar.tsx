@@ -57,7 +57,7 @@ export function SearchBar({ value, onChange, contacts, onSelectContact }: Search
   const query = value.trim().toLowerCase();
 
   const results = useMemo(() => {
-    if (!query || query.length < 1) return [];
+    if (!query || query.length < 2) return [];
     return contacts
       .filter(
         (c) =>
@@ -99,7 +99,7 @@ export function SearchBar({ value, onChange, contacts, onSelectContact }: Search
 
             {/* Dropdown de resultados */}
             <AnimatePresence>
-              {showResults && query.length >= 1 && (
+              {showResults && query.length >= 2 && (
                 <motion.div
                   initial={{ opacity: 0, y: -6, scale: 0.97 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
