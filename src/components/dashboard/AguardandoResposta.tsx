@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import type { Contact, Phase } from "@/hooks/useContacts";
 
 interface Props {
@@ -16,26 +15,17 @@ function AvatarBubble({ contact, onClick, color }: { contact: Contact; onClick: 
   return (
     <button onClick={onClick} className="flex flex-col items-center gap-1.5 group">
       <div className="relative">
-        <motion.div
-          className="absolute inset-0 rounded-full"
+        {/* CSS pulse ring — muito mais leve que 3x motion.div com Infinity */}
+        <span
+          className="absolute inset-0 rounded-full animate-ping opacity-30"
           style={{ background: color.ring }}
-          animate={{ scale: [1, 1.55, 1], opacity: [0.6, 0, 0.6] }}
-          transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
         />
-        <motion.div
-          className="absolute inset-0 rounded-full"
-          style={{ background: color.ring }}
-          animate={{ scale: [1, 1.28, 1], opacity: [0.8, 0, 0.8] }}
-          transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
-        />
-        <motion.div
-          className="relative w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-base z-10"
+        <div
+          className="relative w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-base z-10 group-hover:scale-110 transition-transform duration-200"
           style={{ background: color.bg, boxShadow: color.shadow }}
-          animate={{ scale: [1, 1.06, 1] }}
-          transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
         >
           {getInitials(contact.nombre) || "?"}
-        </motion.div>
+        </div>
       </div>
       <span className="text-[10px] font-medium text-foreground/80 max-w-[64px] truncate text-center group-hover:text-foreground transition-colors">
         {contact.nombre.split(" ")[0]}
