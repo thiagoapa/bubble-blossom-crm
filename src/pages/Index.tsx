@@ -58,10 +58,15 @@ const Index = () => {
   }, [changePhase]);
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
+  // Busca por nome E telefone
   const filteredContactsByPhase = (fase: Phase) => {
     const all = contactsByPhase(fase);
     if (!normalizedQuery) return all;
-    return all.filter((c) => c.nombre.toLowerCase().includes(normalizedQuery));
+    return all.filter(
+      (c) =>
+        c.nombre.toLowerCase().includes(normalizedQuery) ||
+        (c.telefono ?? "").replace(/\D/g, "").includes(normalizedQuery.replace(/\D/g, ""))
+    );
   };
 
   if (!authed) {
@@ -125,7 +130,14 @@ const Index = () => {
                 <div className="flex-1">
                   <ContactInput onAdd={handleAddContact} />
                 </div>
-                <SearchBar value={searchQuery} onChange={setSearchQuery} />
+                <div className="flex items-center gap-1.5">
+                  {normalizedQuery && (
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-300 whitespace-nowrap">
+                      {PIPELINE_PHASES.reduce((acc, p) => acc + filteredContactsByPhase(p.key).length, 0)} resultado{PIPELINE_PHASES.reduce((acc, p) => acc + filteredContactsByPhase(p.key).length, 0) !== 1 ? "s" : ""}
+                    </span>
+                  )}
+                  <SearchBar value={searchQuery} onChange={setSearchQuery} />
+                </div>
               </div>
             </div>
             <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-thin">
