@@ -19,7 +19,7 @@ export function SearchBar({ value, onChange, contacts, onSelectContact }: Search
 
   const handleOpen = () => {
     setOpen(true);
-    setShowResults(true);
+    setShowResults(false); // só mostra resultados quando digitar
     setTimeout(() => inputRef.current?.focus(), 50);
   };
 
@@ -90,7 +90,7 @@ export function SearchBar({ value, onChange, contacts, onSelectContact }: Search
                 ref={inputRef}
                 type="text"
                 value={value}
-                onChange={(e) => { onChange(e.target.value); setShowResults(true); }}
+                onChange={(e) => { onChange(e.target.value); setShowResults(e.target.value.trim().length >= 2); }}
                 onFocus={() => setShowResults(true)}
                 placeholder="Buscar contato..."
                 className="w-full bg-muted/60 border border-border rounded-xl pl-8 pr-3 py-1.5 text-xs font-medium text-foreground placeholder:text-muted-foreground/60 outline-none focus:ring-1 focus:ring-primary/50 transition-all"
