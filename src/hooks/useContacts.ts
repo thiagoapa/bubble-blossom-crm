@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { getToken } from "@/components/LoginScreen";
 
 const API_BASE = "https://crm.project28.cloud/api";
@@ -176,19 +176,44 @@ export function useContacts() {
 
   useEffect(() => { saveGroups(groups); }, [groups]);
 
-  const contactosNormalizados = contacts.map((c) => ({ ...c, createdAt: c.createdAt ?? c.fechaCreacion }));
-  const currentWeekStart = getWeekStart();
-  const weeklyCount = contactosNormalizados.filter((c) => (c.createdAt ?? c.fechaCreacion) >= currentWeekStart).length;
-  const weekProgress = Math.min((weeklyCount / metaSemanal) * 100, 100);
-  const today = new Date().toISOString().split("T")[0];
-  const todayCount = contactosNormalizados.filter((c) => (c.createdAt ?? c.fechaCreacion) === today).length;
-  const monthPrefix = today.slice(0, 7);
-  const monthCount = contactosNormalizados.filter((c) => (c.createdAt ?? c.fechaCreacion).startsWith(monthPrefix)).length;
-  const heatmapDays = Array.from({ length: 30 }, (_, i) => {
-    const d = new Date(); d.setDate(d.getDate() - (29 - i));
-    const dateStr = d.toISOString().split("T")[0];
-    return { date: dateStr, count: contactosNormalizados.filter((c) => (c.createdAt ?? c.fechaCreacion) === dateStr).length };
-  });
+  const contactosNormalizados = useMemo(
+    () => contacts.map((c) => ({ ...c, createdAt: c.createdAt ?? c.fechaCreacion })),
+    [contacts]
+  );
+
+  const { weeklyCount, weekProgress, todayCount, monthCount, heatmapDays } = useMemo(() => {
+    const currentWeekStart = getWeekStart();
+    const today = new Date().toISOString().split("T")[0];
+    const monthPrefix = today.slice(0, 7);
+
+    let weekly = 0;
+    let todayC = 0;
+    let monthC = 0;
+    const dateCounts: Record<string, number> = {};
+
+    for (const c of contactosNormalizados) {
+      const d = c.createdAt ?? c.fechaCreacion ?? "";
+      if (d >= currentWeekStart) weekly++;
+      if (d === today) todayC++;
+      if (d.startsWith(monthPrefix)) monthC++;
+      dateCounts[d] = (dateCounts[d] ?? 0) + 1;
+    }
+
+    const heatmap = Array.from({ length: 30 }, (_, i) => {
+      const dt = new Date();
+      dt.setDate(dt.getDate() - (29 - i));
+      const dateStr = dt.toISOString().split("T")[0];
+      return { date: dateStr, count: dateCounts[dateStr] ?? 0 };
+    });
+
+    return {
+      weeklyCount: weekly,
+      weekProgress: Math.min((weekly / metaSemanal) * 100, 100),
+      todayCount: todayC,
+      monthCount: monthC,
+      heatmapDays: heatmap,
+    };
+  }, [contactosNormalizados, metaSemanal]);
 
   const addContact = useCallback(async (nombre: string, telefono?: string, createdDate?: string) => {
     const baseDate = createdDate || new Date().toISOString().split("T")[0];
@@ -363,7 +388,20 @@ export function useContacts() {
     setGroups((prev) => prev.filter((g) => g.id !== groupId));
   }, []);
 
-  const contactsByPhase = (fase: Phase) => contacts.filter((c) => c.fase === fase);
+  // Memoized lookup: pre-group contacts by phase so each call is O(1)
+  const contactsByPhaseMap = useMemo(() => {
+    const map: Partial<Record<Phase, Contact[]>> = {};
+    for (const c of contactosNormalizados) {
+      if (!map[c.fase]) map[c.fase] = [];
+      map[c.fase]!.push(c);
+    }
+    return map;
+  }, [contactosNormalizados]);
+
+  const contactsByPhase = useCallback(
+    (fase: Phase): Contact[] => contactsByPhaseMap[fase] ?? [],
+    [contactsByPhaseMap]
+  );
 
   return {
     contacts: contactosNormalizados, groups, loading, metaSemanal, weeklyCount, weekProgress,
